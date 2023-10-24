@@ -16,6 +16,7 @@ public static class Dependencies
         IConfiguration configuration)
     {
         services.ConfigureDatabase(configuration);
+        services.ConfigureMapster();
         return services;
     }
 
