@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Blog.Core.Validators.Catrgories;
 
-public class CategoryEntityValidator : AbstractValidator<Category>
+public sealed class CategoryEntityValidator : AbstractValidator<Category>
 {
     public CategoryEntityValidator()
     {

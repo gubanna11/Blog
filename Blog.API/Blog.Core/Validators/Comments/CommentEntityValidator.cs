@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Blog.Core.Validators.Comments;
 
-public class CommentEntityValidator : AbstractValidator<Comment>
+public sealed class CommentEntityValidator : AbstractValidator<Comment>
 {
     public CommentEntityValidator()
     {
