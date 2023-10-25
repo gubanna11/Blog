@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Blog.Core.Entities;
 using Blog.Core.MediatR.Queries.Users;
+using Blog.Infrastructure.Services.Interfaces;
 using MediatR;
 
 namespace Blog.Infrastructure.MediatR.Handlers.Users;
@@ -18,8 +20,6 @@ public sealed class GetUsersHandler : IRequestHandler<GetUsersQuery, IEnumerable
 
     public Task<IEnumerable<User>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
     {
-        var users = _userService.GetUsers();
-
-        return Task.FromResult(users);
+        throw new NotImplementedException();
     }
 }

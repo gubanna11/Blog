@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Blog.Core.Entities;
 using Blog.Core.MediatR.Queries.Posts;
+using Blog.Infrastructure.Services.Interfaces;
 using MediatR;
 
 namespace Blog.Infrastructure.MediatR.Handlers.Posts;

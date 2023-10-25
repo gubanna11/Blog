@@ -1,4 +1,5 @@
-﻿using Blog.Core.Entities;
+﻿using Blog.Core.Contracts.Controllers.Posts;
+using Blog.Core.Entities;
 using MediatR;
 
 namespace Blog.Core.MediatR.Commands.Posts;

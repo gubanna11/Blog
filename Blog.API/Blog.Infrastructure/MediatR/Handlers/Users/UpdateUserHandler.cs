@@ -1,7 +1,9 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Blog.Core.Entities;
 using Blog.Core.MediatR.Commands.Users;
+using Blog.Infrastructure.Services.Interfaces;
 using MediatR;
 
 namespace Blog.Infrastructure.MediatR.Handlers.Users;
@@ -15,10 +17,8 @@ public sealed class UpdateUserHandler : IRequestHandler<UpdateUserCommand, User?
         _userService = userService;
     }
 
-    public async Task<User?> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
+    public Task<User?> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
     {
-        var user = await _userService.UpdateUser(request.User);
-
-        return user;
+        throw new NotImplementedException();
     }
 }

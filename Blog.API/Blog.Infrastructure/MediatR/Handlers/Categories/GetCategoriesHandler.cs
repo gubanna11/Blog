@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Blog.Core.Entities;
 using Blog.Core.MediatR.Queries.Categories;
+using Blog.Infrastructure.Services.Interfaces;
 using MediatR;
 
 namespace Blog.Infrastructure.MediatR.Handlers.Categories;

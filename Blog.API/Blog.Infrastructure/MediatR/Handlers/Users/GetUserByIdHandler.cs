@@ -1,7 +1,9 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Blog.Core.Entities;
 using Blog.Core.MediatR.Queries.Users;
+using Blog.Infrastructure.Services.Interfaces;
 using MediatR;
 
 namespace Blog.Infrastructure.MediatR.Handlers.Users;
@@ -15,10 +17,8 @@ public sealed class GetUserByIdHandler : IRequestHandler<GetUserByIdQuery, User?
         _userService = userService;
     }
 
-    public async Task<User?> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
+    public Task<User?> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
     {
-        var user = await _userService.GetUserById(request.Id);
-
-        return user;
+        throw new NotImplementedException();
     }
 }
