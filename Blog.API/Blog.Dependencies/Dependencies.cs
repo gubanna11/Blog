@@ -1,5 +1,7 @@
 ﻿using Blog.Core.Entities;
 using Blog.Infrastructure.Data;
+using Blog.Infrastructure.Services;
+using Blog.Infrastructure.Services.Interfaces;
 using Blog.Infrastructure.MediatR.Handlers.Posts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +16,7 @@ public static class Dependencies
         IConfiguration configuration)
     {
         services.ConfigureDatabase(configuration);
+        services.ConfigureServices();
         services.ConfigureMediatR();
         return services;
     }
@@ -26,6 +29,15 @@ public static class Dependencies
         services.AddIdentity<User, IdentityRole>()
             .AddEntityFrameworkStores<ApiDataContext>()
             .AddDefaultTokenProviders();
+    }
+
+    private static void ConfigureServices(this IServiceCollection services)
+    {
+        services.AddScoped<ICategoryService, CategoryService>();
+        services.AddScoped<IPostService, PostService>();
+        services.AddScoped<ICommentService, CommentService>();
+
+        services.AddScoped<IUserService, UserService>();
     }
 
     private static void ConfigureMediatR(this IServiceCollection services)
