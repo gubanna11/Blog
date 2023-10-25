@@ -23,7 +23,7 @@ public static class Dependencies
         services.ConfigureServices();
         services.ConfigureMediatR();
 
-        return services;
+      return services;
     }
 
     private static void ConfigureDatabase(this IServiceCollection services, IConfiguration configuration)
