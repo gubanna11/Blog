@@ -1,5 +1,8 @@
 ﻿using Blog.Core.Entities;
 using Blog.Infrastructure.Data;
+using Blog.Infrastructure.Mapster;
+using Mapster;
+using MapsterMapper;
 using Blog.Infrastructure.Services;
 using Blog.Infrastructure.Services.Interfaces;
 using Blog.Infrastructure.MediatR.Handlers.Posts;
@@ -16,8 +19,10 @@ public static class Dependencies
         IConfiguration configuration)
     {
         services.ConfigureDatabase(configuration);
+        services.ConfigureMapster();
         services.ConfigureServices();
         services.ConfigureMediatR();
+
         return services;
     }
 
@@ -29,6 +34,15 @@ public static class Dependencies
         services.AddIdentity<User, IdentityRole>()
             .AddEntityFrameworkStores<ApiDataContext>()
             .AddDefaultTokenProviders();
+    }
+
+    private static void ConfigureMapster(this IServiceCollection services)
+    {
+        TypeAdapterConfig config = new();
+        config.Apply(new MapsterRegister());
+        services.AddSingleton(config);
+
+        services.AddSingleton<IMapper>(sp => new ServiceMapper(sp, config));
     }
 
     private static void ConfigureServices(this IServiceCollection services)
