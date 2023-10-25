@@ -3,6 +3,8 @@ using Blog.Infrastructure.Data;
 using Blog.Infrastructure.Mapster;
 using Mapster;
 using MapsterMapper;
+using Blog.Infrastructure.Services;
+using Blog.Infrastructure.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -17,6 +19,8 @@ public static class Dependencies
     {
         services.ConfigureDatabase(configuration);
         services.ConfigureMapster();
+        services.ConfigureServices();
+      
         return services;
     }
 
@@ -37,5 +41,14 @@ public static class Dependencies
         services.AddSingleton(config);
 
         services.AddSingleton<IMapper>(sp => new ServiceMapper(sp, config));
+    }
+
+    private static void ConfigureServices(this IServiceCollection services)
+    {
+        services.AddScoped<ICategoryService, CategoryService>();
+        services.AddScoped<IPostService, PostService>();
+        services.AddScoped<ICommentService, CommentService>();
+
+        services.AddScoped<IUserService, UserService>();
     }
 }
