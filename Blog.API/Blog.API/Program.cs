@@ -3,8 +3,13 @@ using Blog.Dependencies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using SpanJson.AspNetCore.Formatter;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 
 // Add services to the container.
 
@@ -16,6 +21,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.ConfigureEnvironment(builder.Configuration);
 
 builder.Services.AddTransient<GlobalExceptionHandlingMiddleware>();
+
+builder.Services.AddControllers().AddSpanJson();
 
 var app = builder.Build();
 

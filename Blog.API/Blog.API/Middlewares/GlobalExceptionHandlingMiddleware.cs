@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using SpanJson;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 
@@ -8,6 +8,13 @@ namespace Blog.API.Middlewares;
 
 public sealed class GlobalExceptionHandlingMiddleware : IMiddleware
 {
+    private readonly ILogger _logger;
+
+    public GlobalExceptionHandlingMiddleware(ILogger<GlobalExceptionHandlingMiddleware> logger)
+    {
+        _logger = logger;
+    }
+
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
         try
@@ -16,6 +23,8 @@ public sealed class GlobalExceptionHandlingMiddleware : IMiddleware
         }
         catch (Exception ex)
         {
+            _logger.LogError($"An unhandled exception occured. Exception {typeof(Exception)}", ex);
+
             context.Response.StatusCode = StatusCodes.Status500InternalServerError;
 
             ProblemDetails problemDetails = new()
@@ -23,14 +32,10 @@ public sealed class GlobalExceptionHandlingMiddleware : IMiddleware
                 Status = StatusCodes.Status500InternalServerError,
                 Type = "Server error",
                 Title = "Server error",
-                Detail = $"An internal server error has occurred: {ex.Message}",
+                Detail = $"An internal server error has occurred",
             };
 
-            byte[] json = JsonSerializer.Generic.Utf8.Serialize(problemDetails);
-
-            context.Response.ContentType = "application/json";
-
-            await context.Response.Body.WriteAsync(json);
+            await context.Response.WriteAsJsonAsync(problemDetails);
         }
     }
 }
