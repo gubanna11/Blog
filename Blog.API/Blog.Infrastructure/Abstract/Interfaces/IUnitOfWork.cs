@@ -2,8 +2,8 @@
 
 namespace Blog.Infrastructure.Abstract.Interfaces;
 
-public interface IUnitOfWork
+public interface IUnitOfWork<T> where T : class
 {
-    IGenericRepository<T> GenericRepository<T>() where T : class;
+    IGenericRepository<T> GenericRepository<T> { get; }
     Task SaveChangesAsync();
 }
