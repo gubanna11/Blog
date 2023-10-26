@@ -51,6 +51,7 @@ public static class Dependencies
     private static void ConfigureUnitOfWork(this IServiceCollection services)
     {
         services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+        services.AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>));
     }
 
     private static void ConfigureServices(this IServiceCollection services)
