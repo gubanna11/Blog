@@ -23,7 +23,7 @@ public sealed class GlobalExceptionHandlingMiddleware : IMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError($"An unhandled exception occured. Exception {typeof(Exception)}", ex);
+            _logger.LogError("An unhandled exception occured. Exception: {error}", ex.ToString());
 
             context.Response.StatusCode = StatusCodes.Status500InternalServerError;
 
