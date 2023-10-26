@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Blog.Infrastructure.Abstract.Interfaces;
+using Blog.Infrastructure.Abstract;
 
 namespace Blog.Dependencies;
 
@@ -19,6 +21,7 @@ public static class Dependencies
     {
         services.ConfigureDatabase(configuration);
         services.ConfigureMapster();
+        services.ConfigureUnitOfWork();
         services.ConfigureServices();
       
         return services;
@@ -41,6 +44,11 @@ public static class Dependencies
         services.AddSingleton(config);
 
         services.AddSingleton<IMapper>(sp => new ServiceMapper(sp, config));
+    }
+
+    private static void ConfigureUnitOfWork(this IServiceCollection services)
+    {
+        services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
     }
 
     private static void ConfigureServices(this IServiceCollection services)
