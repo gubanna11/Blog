@@ -5,6 +5,7 @@ using Mapster;
 using MapsterMapper;
 using Blog.Infrastructure.Services;
 using Blog.Infrastructure.Services.Interfaces;
+using Blog.Infrastructure.MediatR.Handlers.Posts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -23,8 +24,9 @@ public static class Dependencies
         services.ConfigureMapster();
         services.ConfigureUnitOfWork();
         services.ConfigureServices();
-      
-        return services;
+        services.ConfigureMediatR();
+
+      return services;
     }
 
     private static void ConfigureDatabase(this IServiceCollection services, IConfiguration configuration)
@@ -48,6 +50,7 @@ public static class Dependencies
 
     private static void ConfigureUnitOfWork(this IServiceCollection services)
     {
+        services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         services.AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>));
     }
 
@@ -58,5 +61,10 @@ public static class Dependencies
         services.AddScoped<ICommentService, CommentService>();
 
         services.AddScoped<IUserService, UserService>();
+    }
+
+    private static void ConfigureMediatR(this IServiceCollection services)
+    {
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<GetPostsHandler>());
     }
 }
