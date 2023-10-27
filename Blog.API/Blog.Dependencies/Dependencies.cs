@@ -1,17 +1,17 @@
 ﻿using Blog.Core.Entities;
+using Blog.Infrastructure.Abstract;
+using Blog.Infrastructure.Abstract.Interfaces;
 using Blog.Infrastructure.Data;
 using Blog.Infrastructure.Mapster;
-using Mapster;
-using MapsterMapper;
+using Blog.Infrastructure.MediatR.Handlers.Posts;
 using Blog.Infrastructure.Services;
 using Blog.Infrastructure.Services.Interfaces;
-using Blog.Infrastructure.MediatR.Handlers.Posts;
+using Mapster;
+using MapsterMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Blog.Infrastructure.Abstract.Interfaces;
-using Blog.Infrastructure.Abstract;
 
 namespace Blog.Dependencies;
 
@@ -26,13 +26,13 @@ public static class Dependencies
         services.ConfigureServices();
         services.ConfigureMediatR();
 
-      return services;
+        return services;
     }
 
     private static void ConfigureDatabase(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<ApiDataContext>(
-            options => options.UseSqlServer(configuration["ConnectionString:String"]!));
+            options => options.UseSqlServer(configuration["ConnectionStrings:Database"]!));
 
         services.AddIdentity<User, IdentityRole>()
             .AddEntityFrameworkStores<ApiDataContext>()
