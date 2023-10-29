@@ -1,7 +1,7 @@
 ﻿using Blog.Core.Entities;
 using FluentValidation;
 
-namespace Blog.Core.Validators.Catrgories;
+namespace Blog.Core.Validators.Categories;
 
 public sealed class CategoryEntityValidator : AbstractValidator<Category>
 {
