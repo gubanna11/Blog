@@ -9,7 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddSpanJson();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -17,8 +17,6 @@ builder.Services.AddSwaggerGen();
 builder.Services.ConfigureEnvironment(builder.Configuration);
 
 builder.Services.AddTransient<GlobalExceptionHandlingMiddleware>();
-
-builder.Services.AddControllers().AddSpanJson();
 
 var app = builder.Build();
 
