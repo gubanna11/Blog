@@ -10,8 +10,8 @@ namespace Blog.Infrastructure.MediatR.Handlers.Posts;
 
 public sealed class CreatePostHandler : IRequestHandler<CreatePostCommand, Post>
 {
-    private readonly IPostService _postService;
     private readonly IMapper _mapper;
+    private readonly IPostService _postService;
 
     public CreatePostHandler(IPostService postService, IMapper mapper)
     {

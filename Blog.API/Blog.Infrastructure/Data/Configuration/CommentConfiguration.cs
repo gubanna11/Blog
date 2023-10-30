@@ -29,7 +29,7 @@ internal sealed class CommentConfiguration : IEntityTypeConfiguration<Comment>
                 PostId = _postsGuids[0],
                 UserId = _userId,
                 PublishDate = DateTime.Now,
-                ParentCommentId = _postsGuids[0],
+                ParentCommentId = null,
             },
             new()
             {
@@ -38,7 +38,7 @@ internal sealed class CommentConfiguration : IEntityTypeConfiguration<Comment>
                 PostId = _postsGuids[1],
                 UserId = _userId,
                 PublishDate = DateTime.Now,
-                ParentCommentId = _postsGuids[0],
+                ParentCommentId = null,
             },
             new()
             {
@@ -47,7 +47,7 @@ internal sealed class CommentConfiguration : IEntityTypeConfiguration<Comment>
                 PostId = _postsGuids[2],
                 UserId = _userId,
                 PublishDate = DateTime.Now,
-                ParentCommentId = _postsGuids[0],
+                ParentCommentId = null,
             },
             new()
             {
