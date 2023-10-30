@@ -46,14 +46,17 @@ public sealed class GenericRepository<T> : IGenericRepository<T> where T : class
         return await _context.Set<T>().FindAsync(id);
     }
 
-    public void Remove(object id)
+    public T? Remove(object id)
     {
         var entity = _context.Set<T>().Find(id);
         if (entity is not null)
         {
             EntityEntry entityEntry = _context.Entry(entity);
             entityEntry.State = EntityState.Deleted;
+
+            return entity;
         }
+        return null;
     }
 
     public void RemoveRange(IEnumerable<T> entities)

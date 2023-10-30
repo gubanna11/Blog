@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Blog.Core.Entities;
@@ -17,10 +19,10 @@ public sealed class GetCategoriesHandler : IRequestHandler<GetCategoriesQuery, I
         _categoryService = categoryService;
     }
 
-    public Task<IEnumerable<Category>> Handle(GetCategoriesQuery request, CancellationToken cancellationToken)
+    public async Task<IEnumerable<Category>> Handle(GetCategoriesQuery request, CancellationToken cancellationToken)
     {
-        var categories = _categoryService.GetCategories();
+        var categories = await _categoryService.GetCategories();
 
-        return Task.FromResult(categories);
+        return categories;
     }
 }

@@ -21,8 +21,8 @@ public sealed class UpdateCategoryHandler : IRequestHandler<UpdateCategoryComman
 
     public async Task<Category?> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
     {
-        var category = _mapper.Map<Category>(request.Category);
-        var responseCategory = await _categoryService.UpdateCategory(category);
+        Category category = _mapper.Map<Category>(request.Category);
+        Category? responseCategory = await _categoryService.UpdateCategory(category);
 
         return responseCategory;
     }

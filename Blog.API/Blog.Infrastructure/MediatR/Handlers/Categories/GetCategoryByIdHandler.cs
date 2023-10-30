@@ -18,7 +18,7 @@ public sealed class GetCategoryByIdHandler : IRequestHandler<GetCategoryByIdQuer
 
     public async Task<Category?> Handle(GetCategoryByIdQuery request, CancellationToken cancellationToken)
     {
-        var category = await _categoryService.GetCategoryById(request.Id);
+        Category? category = await _categoryService.GetCategoryById(request.Id);
 
         return category;
     }
