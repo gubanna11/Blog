@@ -1,4 +1,6 @@
-﻿using Blog.Core.Entities;
+﻿using Blog.Core.Contracts.Controllers.Categories;
+using Blog.Core.Entities;
+using Blog.Core.Validators.Categories;
 using Blog.Infrastructure.Abstract;
 using Blog.Infrastructure.Abstract.Interfaces;
 using Blog.Infrastructure.Data;
@@ -6,6 +8,7 @@ using Blog.Infrastructure.Mapster;
 using Blog.Infrastructure.MediatR.Handlers.Posts;
 using Blog.Infrastructure.Services;
 using Blog.Infrastructure.Services.Interfaces;
+using FluentValidation;
 using Mapster;
 using MapsterMapper;
 using Microsoft.AspNetCore.Identity;
@@ -25,6 +28,7 @@ public static class Dependencies
         services.ConfigureUnitOfWork();
         services.ConfigureServices();
         services.ConfigureMediatR();
+        services.ConfigureValidators();
 
         return services;
     }
@@ -66,5 +70,11 @@ public static class Dependencies
     private static void ConfigureMediatR(this IServiceCollection services)
     {
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<GetPostsHandler>());
+    }
+
+    private static void ConfigureValidators(this IServiceCollection services)
+    {
+        services.AddScoped<IValidator<CreateCategoryRequest>, CreateCategoryRequestValidator>();
+        services.AddScoped<IValidator<UpdateCategoryRequest>, UpdateCategoryRequestValidator>();
     }
 }

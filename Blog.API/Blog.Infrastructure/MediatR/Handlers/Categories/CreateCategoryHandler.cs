@@ -8,7 +8,7 @@ using MediatR;
 
 namespace Blog.Infrastructure.MediatR.Handlers.Categories;
 
-public sealed class CreateCategoryHandler : IRequestHandler<CreateCategoryCommand, Category>
+public sealed class CreateCategoryHandler : IRequestHandler<CreateCategoryCommand, Category?>
 {
     private readonly ICategoryService _categoryService;
     private readonly IMapper _mapper;
@@ -19,10 +19,9 @@ public sealed class CreateCategoryHandler : IRequestHandler<CreateCategoryComman
         _mapper = mapper;
     }
 
-    public async Task<Category> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
+    public async Task<Category?> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
     {
-        var category = _mapper.Map<Category>(request.Category);
-        var responseCategory = await _categoryService.CreateCategory(category);
+        var responseCategory = await _categoryService.CreateCategory(request.Category);
 
         return responseCategory;
     }
