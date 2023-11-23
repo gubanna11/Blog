@@ -1,5 +1,6 @@
 ﻿using Blog.Core.Contracts.Controllers.Categories;
 using Blog.Core.Entities;
+using Blog.Core.ResponseDtos;
 using Blog.Infrastructure.Abstract.Interfaces;
 using Blog.Infrastructure.Services.Interfaces;
 using FluentValidation;
@@ -34,7 +35,7 @@ public sealed class CategoryService : ICategoryService
         _mapper = mapper;
     }
 
-    public async Task<IEnumerable<Category>> GetCategories()
+    public async Task<IEnumerable<CategoryResponse>> GetCategories()
     {
         var categories = await _unitOfWork.GenericRepository.Set
             .Include(c => c.Posts)
@@ -50,26 +51,31 @@ public sealed class CategoryService : ICategoryService
                 }
             }
         }
-
-        return categories;
+        return _mapper.Map<IEnumerable<CategoryResponse>>(categories);
     }
 
-    public async Task<Category?> GetCategoryById(Guid id)
+    public async Task<CategoryResponse?> GetCategoryById(Guid id)
     {
         Category? category = await _unitOfWork.GenericRepository.Set
             .Where(c => c.CategoryId == id)
             .Include(c => c.Posts)
             .FirstOrDefaultAsync();
 
-        return category;
+        if (category is not null)
+        {
+            return _mapper.Map<CategoryResponse>(category);
+        }
+
+        _logger.LogError("Object with id {id} doesn't exist", id);
+        return null;        
     }
 
-    public async Task<Category?> CreateCategory(CreateCategoryRequest createCategory)
+    public async Task<CategoryResponse?> CreateCategory(CreateCategoryRequest createCategory)
     {
         var result = _createCategoryValidator.Validate(createCategory);
         if (!result.IsValid)
         {
-            //_logger.LogError("CreateCategoryRequest object errors:\nerrors", result.Errors.Select(e => e.ErrorMessage));
+            _logger.LogError("CreateCategoryRequest object errors:\n{errors}", result.Errors.Select(e => e.ErrorMessage));
             return null;
         }
 
@@ -77,15 +83,15 @@ public sealed class CategoryService : ICategoryService
 
         await _unitOfWork.GenericRepository.AddAsync(category);
         await _unitOfWork.SaveChangesAsync();
-        return category;
+        return _mapper.Map<CategoryResponse>(category);
     }
 
-    public async Task<Category?> UpdateCategory(UpdateCategoryRequest updateCategory)
+    public async Task<CategoryResponse?> UpdateCategory(UpdateCategoryRequest updateCategory)
     {
         var result = _updateCategoryValidator.Validate(updateCategory);
         if (!result.IsValid)
         {
-            //_logger.LogError("UpdateCategoryRequest object errors:\n", result.Errors.Select(e => e.ErrorMessage));
+            _logger.LogError("UpdateCategoryRequest object errors:\n{errors}", result.Errors.Select(e => e.ErrorMessage));
             return null;
         }
 
@@ -93,19 +99,20 @@ public sealed class CategoryService : ICategoryService
 
         _unitOfWork.GenericRepository.Update(category);
         await _unitOfWork.SaveChangesAsync();
-        return category;
+        return _mapper.Map<CategoryResponse>(category);
     }
 
-    public async Task<Category?> DeleteCategory(Guid id)
+    public async Task<CategoryResponse?> DeleteCategory(Guid id)
     {
         Category? category = _unitOfWork.GenericRepository.Remove(id);
 
         if (category is not null)
         {
             await _unitOfWork.SaveChangesAsync();
-            return category;
+            return _mapper.Map<CategoryResponse>(category);
         }
 
+        _logger.LogError("Object with id {id} doesn't exist", id);
         return null;
     }
 }

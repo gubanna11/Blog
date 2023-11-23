@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using Blog.Core.Entities;
+using Blog.Core.ResponseDtos;
 using MediatR;
 
 namespace Blog.Core.MediatR.Queries.Categories;
 
-public sealed record GetCategoriesQuery : IRequest<IEnumerable<Category>>;
+public sealed record GetCategoriesQuery : IRequest<IEnumerable<CategoryResponse>>;

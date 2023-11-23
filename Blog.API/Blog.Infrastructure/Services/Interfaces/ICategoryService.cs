@@ -1,5 +1,5 @@
 ﻿using Blog.Core.Contracts.Controllers.Categories;
-using Blog.Core.Entities;
+using Blog.Core.ResponseDtos;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -8,9 +8,9 @@ namespace Blog.Infrastructure.Services.Interfaces;
 
 public interface ICategoryService
 {
-    Task<IEnumerable<Category>> GetCategories();
-    Task<Category?> GetCategoryById(Guid id);
-    Task<Category?> CreateCategory(CreateCategoryRequest createCategory);
-    Task<Category?> UpdateCategory(UpdateCategoryRequest updateCategory);
-    Task<Category?> DeleteCategory(Guid id);
+    Task<IEnumerable<CategoryResponse>> GetCategories();
+    Task<CategoryResponse?> GetCategoryById(Guid id);
+    Task<CategoryResponse?> CreateCategory(CreateCategoryRequest createCategory);
+    Task<CategoryResponse?> UpdateCategory(UpdateCategoryRequest updateCategory);
+    Task<CategoryResponse?> DeleteCategory(Guid id);
 }

@@ -1,13 +1,13 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using Blog.Core.Entities;
 using Blog.Core.MediatR.Queries.Categories;
+using Blog.Core.ResponseDtos;
 using Blog.Infrastructure.Services.Interfaces;
 using MediatR;
 
 namespace Blog.Infrastructure.MediatR.Handlers.Categories;
 
-public sealed class GetCategoryByIdHandler : IRequestHandler<GetCategoryByIdQuery, Category?>
+public sealed class GetCategoryByIdHandler : IRequestHandler<GetCategoryByIdQuery, CategoryResponse?>
 {
     private readonly ICategoryService _categoryService;
 
@@ -16,9 +16,9 @@ public sealed class GetCategoryByIdHandler : IRequestHandler<GetCategoryByIdQuer
         _categoryService = categoryService;
     }
 
-    public async Task<Category?> Handle(GetCategoryByIdQuery request, CancellationToken cancellationToken)
+    public async Task<CategoryResponse?> Handle(GetCategoryByIdQuery request, CancellationToken cancellationToken)
     {
-        Category? category = await _categoryService.GetCategoryById(request.Id);
+        CategoryResponse? category = await _categoryService.GetCategoryById(request.Id);
 
         return category;
     }
