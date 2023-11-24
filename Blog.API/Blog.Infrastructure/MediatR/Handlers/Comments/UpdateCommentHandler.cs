@@ -1,28 +1,24 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using Blog.Core.Entities;
-using Blog.Core.MediatR.Commands.Comments;
+﻿using Blog.Core.MediatR.Commands.Comments;
+using Blog.Core.ResponseDtos;
 using Blog.Infrastructure.Services.Interfaces;
-using MapsterMapper;
 using MediatR;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Blog.Infrastructure.MediatR.Handlers.Comments;
 
-public sealed class UpdateCommentHandler : IRequestHandler<UpdateCommentCommand, Comment?>
+public sealed class UpdateCommentHandler : IRequestHandler<UpdateCommentCommand, CommentResponse?>
 {
     private readonly ICommentService _commentService;
-    private readonly IMapper _mapper;
 
-    public UpdateCommentHandler(ICommentService commentService, IMapper mapper)
+    public UpdateCommentHandler(ICommentService commentService)
     {
         _commentService = commentService;
-        _mapper = mapper;
     }
 
-    public async Task<Comment?> Handle(UpdateCommentCommand request, CancellationToken cancellationToken)
+    public async Task<CommentResponse?> Handle(UpdateCommentCommand request, CancellationToken cancellationToken)
     {
-        var comment = _mapper.Map<Comment>(request.Comment);
-        var responseComment = await _commentService.UpdateComment(comment);
+        var responseComment = await _commentService.UpdateComment(request.Comment);
 
         return responseComment;
     }

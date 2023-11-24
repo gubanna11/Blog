@@ -1,13 +1,13 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using Blog.Core.Entities;
-using Blog.Core.MediatR.Commands.Comments;
+﻿using Blog.Core.MediatR.Commands.Comments;
+using Blog.Core.ResponseDtos;
 using Blog.Infrastructure.Services.Interfaces;
 using MediatR;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Blog.Infrastructure.MediatR.Handlers.Comments;
 
-public sealed class DeleteCommentHandler : IRequestHandler<DeleteCommentCommand, Comment?>
+public sealed class DeleteCommentHandler : IRequestHandler<DeleteCommentCommand, CommentResponse?>
 {
     private readonly ICommentService _commentService;
 
@@ -16,7 +16,7 @@ public sealed class DeleteCommentHandler : IRequestHandler<DeleteCommentCommand,
         _commentService = commentService;
     }
 
-    public async Task<Comment?> Handle(DeleteCommentCommand request, CancellationToken cancellationToken)
+    public async Task<CommentResponse?> Handle(DeleteCommentCommand request, CancellationToken cancellationToken)
     {
         var comment = await _commentService.DeleteComment(request.Id);
 

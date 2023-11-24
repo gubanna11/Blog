@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Blog.Core.Contracts.Controllers.Categories;
-using Blog.Core.Entities;
+﻿using Blog.Core.Contracts.Controllers.Categories;
 using Blog.Core.MediatR.Commands.Categories;
 using Blog.Core.MediatR.Queries.Categories;
 using Blog.Core.ResponseDtos;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Blog.API.Controllers;
 

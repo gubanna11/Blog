@@ -1,15 +1,16 @@
-﻿using System;
+﻿using Blog.Core.Contracts.Controllers.Comments;
+using Blog.Core.ResponseDtos;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Blog.Core.Entities;
 
 namespace Blog.Infrastructure.Services.Interfaces;
 
 public interface ICommentService
 {
-    IEnumerable<Comment> GetComments();
-    Task<Comment?> GetCommentById(Guid id);
-    Task<Comment> CreateComment(Comment createComment);
-    Task<Comment?> UpdateComment(Comment updateComment);
-    Task<Comment?> DeleteComment(Guid id);
+    Task<IEnumerable<CommentResponse>> GetComments();
+    Task<CommentResponse?> GetCommentById(Guid id);
+    Task<CommentResponse?> CreateComment(CreateCommentRequest createComment);
+    Task<CommentResponse?> UpdateComment(UpdateCommentRequest updateComment);
+    Task<CommentResponse?> DeleteComment(Guid id);
 }

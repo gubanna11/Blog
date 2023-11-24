@@ -1,13 +1,13 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using Blog.Core.Entities;
-using Blog.Core.MediatR.Queries.Comments;
+﻿using Blog.Core.MediatR.Queries.Comments;
+using Blog.Core.ResponseDtos;
 using Blog.Infrastructure.Services.Interfaces;
 using MediatR;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Blog.Infrastructure.MediatR.Handlers.Comments;
 
-public sealed class GetCommentByIdHandler : IRequestHandler<GetCommentByIdQuery, Comment?>
+public sealed class GetCommentByIdHandler : IRequestHandler<GetCommentByIdQuery, CommentResponse?>
 {
     private readonly ICommentService _commentService;
 
@@ -16,7 +16,7 @@ public sealed class GetCommentByIdHandler : IRequestHandler<GetCommentByIdQuery,
         _commentService = commentService;
     }
 
-    public async Task<Comment?> Handle(GetCommentByIdQuery request, CancellationToken cancellationToken)
+    public async Task<CommentResponse?> Handle(GetCommentByIdQuery request, CancellationToken cancellationToken)
     {
         var comment = await _commentService.GetCommentById(request.Id);
 

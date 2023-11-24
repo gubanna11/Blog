@@ -1,7 +1,7 @@
-﻿using System;
-using Blog.Core.Entities;
+﻿using Blog.Core.ResponseDtos;
 using MediatR;
+using System;
 
 namespace Blog.Core.MediatR.Commands.Comments;
 
-public sealed record DeleteCommentCommand(Guid Id) : IRequest<Comment?>;
+public sealed record DeleteCommentCommand(Guid Id) : IRequest<CommentResponse?>;

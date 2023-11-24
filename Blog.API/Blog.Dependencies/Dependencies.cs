@@ -1,6 +1,8 @@
 ﻿using Blog.Core.Contracts.Controllers.Categories;
+using Blog.Core.Contracts.Controllers.Comments;
 using Blog.Core.Entities;
 using Blog.Core.Validators.Categories;
+using Blog.Core.Validators.Comments;
 using Blog.Infrastructure.Abstract;
 using Blog.Infrastructure.Abstract.Interfaces;
 using Blog.Infrastructure.Data;
@@ -76,5 +78,8 @@ public static class Dependencies
     {
         services.AddScoped<IValidator<CreateCategoryRequest>, CreateCategoryRequestValidator>();
         services.AddScoped<IValidator<UpdateCategoryRequest>, UpdateCategoryRequestValidator>();
+
+        services.AddScoped<IValidator<CreateCommentRequest>, CreateCommentRequestValidator>();
+        services.AddScoped<IValidator<UpdateCommentRequest>, UpdateCommentRequestValidator>();
     }
 }
