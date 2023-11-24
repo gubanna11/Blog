@@ -7,6 +7,7 @@ using Blog.Core.Contracts.Controllers.Categories;
 using Blog.Core.Entities;
 using Blog.Core.MediatR.Commands.Categories;
 using Blog.Core.MediatR.Queries.Categories;
+using Blog.Core.ResponseDtos;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +26,7 @@ public sealed class CategoriesController : ControllerBase
     }
 
     [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Category>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<CategoryResponse>))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(NotFoundResult))]
     public async Task<IActionResult> GetCategories(CancellationToken cancellationToken)
     {
@@ -37,7 +38,7 @@ public sealed class CategoriesController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Category))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CategoryResponse))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(NotFoundResult))]
     public async Task<IActionResult> GetCategoryById([FromRoute] Guid id, CancellationToken cancellationToken)
     {
@@ -49,7 +50,7 @@ public sealed class CategoriesController : ControllerBase
     }
 
     [HttpPost]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Category))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CategoryResponse))]
     public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryRequest createCategory,
         CancellationToken cancellationToken)
     {
@@ -59,7 +60,7 @@ public sealed class CategoriesController : ControllerBase
     }
 
     [HttpPut]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Category))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CategoryResponse))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(NotFoundResult))]
     public async Task<IActionResult> UpdateCategory([FromBody] UpdateCategoryRequest updateCategory,
         CancellationToken cancellationToken)
@@ -72,7 +73,7 @@ public sealed class CategoriesController : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Category))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CategoryResponse))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(NotFoundResult))]
     public async Task<IActionResult> DeleteCategory([FromRoute] Guid id, CancellationToken cancellationToken)
     {

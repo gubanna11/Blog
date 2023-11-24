@@ -63,6 +63,13 @@ public sealed class CategoryService : ICategoryService
 
         if (category is not null)
         {
+            if (category.Posts != null)
+            {
+                foreach (Post post in category.Posts)
+                {
+                    post.Category = null;
+                }
+            }
             return _mapper.Map<CategoryResponse>(category);
         }
 
