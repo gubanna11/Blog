@@ -1,13 +1,13 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using Blog.Core.Entities;
-using Blog.Core.MediatR.Commands.Posts;
+﻿using Blog.Core.MediatR.Commands.Posts;
+using Blog.Core.ResponseDtos;
 using Blog.Infrastructure.Services.Interfaces;
 using MediatR;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Blog.Infrastructure.MediatR.Handlers.Posts;
 
-public sealed class DeletePostHandler : IRequestHandler<DeletePostCommand, Post?>
+public sealed class DeletePostHandler : IRequestHandler<DeletePostCommand, PostResponse?>
 {
     private readonly IPostService _postService;
 
@@ -16,7 +16,7 @@ public sealed class DeletePostHandler : IRequestHandler<DeletePostCommand, Post?
         _postService = postService;
     }
 
-    public async Task<Post?> Handle(DeletePostCommand request, CancellationToken cancellationToken)
+    public async Task<PostResponse?> Handle(DeletePostCommand request, CancellationToken cancellationToken)
     {
         var post = await _postService.DeletePost(request.Id);
 

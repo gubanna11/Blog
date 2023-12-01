@@ -1,13 +1,13 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using Blog.Core.Entities;
-using Blog.Core.MediatR.Queries.Posts;
+﻿using Blog.Core.MediatR.Queries.Posts;
+using Blog.Core.ResponseDtos;
 using Blog.Infrastructure.Services.Interfaces;
 using MediatR;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Blog.Infrastructure.MediatR.Handlers.Posts;
 
-public sealed class GetPostByIdHandler : IRequestHandler<GetPostByIdQuery, Post?>
+public sealed class GetPostByIdHandler : IRequestHandler<GetPostByIdQuery, PostResponse?>
 {
     private readonly IPostService _postService;
 
@@ -16,7 +16,7 @@ public sealed class GetPostByIdHandler : IRequestHandler<GetPostByIdQuery, Post?
         _postService = postService;
     }
 
-    public async Task<Post?> Handle(GetPostByIdQuery request, CancellationToken cancellationToken)
+    public async Task<PostResponse?> Handle(GetPostByIdQuery request, CancellationToken cancellationToken)
     {
         var post = await _postService.GetPostById(request.Id);
 
