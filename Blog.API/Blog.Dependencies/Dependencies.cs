@@ -25,6 +25,7 @@ public static class Dependencies
         services.ConfigureUnitOfWork();
         services.ConfigureServices();
         services.ConfigureMediatR();
+        services.ConfigureRedis(configuration);
 
         return services;
     }
@@ -66,5 +67,13 @@ public static class Dependencies
     private static void ConfigureMediatR(this IServiceCollection services)
     {
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<GetPostsHandler>());
+    }
+    
+    private static void ConfigureRedis(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddStackExchangeRedisCache(opts =>
+        {
+            opts.Configuration = configuration.GetConnectionString("RedisCache");
+        });
     }
 }
