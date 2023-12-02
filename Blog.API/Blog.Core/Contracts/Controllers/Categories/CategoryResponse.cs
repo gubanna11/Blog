@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Blog.Core.Contracts.ResponseDtos;
+namespace Blog.Core.Contracts.Controllers.Categories;
 
 public sealed record CategoryResponse(
     Guid CategoryId,

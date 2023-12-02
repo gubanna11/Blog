@@ -1,5 +1,4 @@
 ﻿using Blog.Core.Contracts.Controllers.Categories;
-using Blog.Core.Contracts.ResponseDtos;
 using Blog.Core.MediatR.Commands.Categories;
 using Blog.Core.MediatR.Queries.Categories;
 using MediatR;

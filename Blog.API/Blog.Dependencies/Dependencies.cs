@@ -8,6 +8,7 @@ using Blog.Infrastructure.MediatR.Handlers.Posts;
 using Blog.Infrastructure.Services;
 using Blog.Infrastructure.Services.Interfaces;
 using FluentValidation;
+using FluentValidation.AspNetCore;
 using Mapster;
 using MapsterMapper;
 using Microsoft.AspNetCore.Identity;
@@ -73,6 +74,7 @@ public static class Dependencies
 
     private static void ConfigureValidators(this IServiceCollection services)
     {
-        services.AddValidatorsFromAssembly(typeof(CreateCommentRequestValidator).Assembly);
+        services.AddFluentValidationAutoValidation();
+        services.AddValidatorsFromAssemblyContaining<CreateCommentRequestValidator>();
     }
 }

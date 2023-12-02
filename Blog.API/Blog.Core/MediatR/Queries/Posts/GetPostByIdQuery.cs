@@ -1,4 +1,4 @@
-﻿using Blog.Core.Contracts.ResponseDtos;
+﻿using Blog.Core.Contracts.Controllers.Posts;
 using MediatR;
 using System;
 

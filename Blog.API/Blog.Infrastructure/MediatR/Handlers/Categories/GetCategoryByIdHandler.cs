@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using Blog.Core.Contracts.ResponseDtos;
+using Blog.Core.Contracts.Controllers.Categories;
 using Blog.Core.MediatR.Queries.Categories;
 using Blog.Infrastructure.Services.Interfaces;
 using MediatR;

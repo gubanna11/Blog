@@ -1,7 +1,6 @@
 ﻿using Blog.Core.Contracts.Controllers.Categories;
 using Blog.Core.Contracts.Controllers.Comments;
 using Blog.Core.Contracts.Controllers.Posts;
-using Blog.Core.Contracts.ResponseDtos;
 using Blog.Core.Entities;
 using Mapster;
 

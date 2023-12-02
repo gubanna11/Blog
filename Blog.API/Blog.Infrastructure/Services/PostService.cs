@@ -1,5 +1,4 @@
 ﻿using Blog.Core.Contracts.Controllers.Posts;
-using Blog.Core.Contracts.ResponseDtos;
 using Blog.Core.Entities;
 using Blog.Infrastructure.Abstract.Interfaces;
 using Blog.Infrastructure.Services.Interfaces;
@@ -38,12 +37,12 @@ public sealed class PostService : IPostService
 
         foreach (var post in posts)
         {
-            if (post.User != null)
+            if (post.User is not null)
             {
                 post.User.Posts = null;
             }
 
-            if (post.Category != null)
+            if (post.Category is not null)
             {
                 post.Category.Posts = null;
             }
@@ -75,7 +74,7 @@ public sealed class PostService : IPostService
             return _mapper.Map<PostResponse>(post);
         }
 
-        _logger.LogError("Object with id {id} doesn't exits", id);
+        _logger.LogError("Post object with id {id} doesn't exits", id);
         return null;
     }
 
@@ -111,7 +110,7 @@ public sealed class PostService : IPostService
             return _mapper.Map<PostResponse>(post);
         }
 
-        _logger.LogError("Object with id {id} doesn't exist", id);
+        _logger.LogError("Post object with id {id} doesn't exist", id);
         return null;
     }
 }

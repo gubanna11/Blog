@@ -1,7 +1,7 @@
 ﻿using Blog.Core.Entities;
 using System;
 
-namespace Blog.Core.Contracts.ResponseDtos;
+namespace Blog.Core.Contracts.Controllers.Comments;
 
 public sealed record CommentResponse
 (

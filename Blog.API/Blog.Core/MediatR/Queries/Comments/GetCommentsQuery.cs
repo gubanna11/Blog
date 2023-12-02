@@ -1,4 +1,4 @@
-﻿using Blog.Core.Contracts.ResponseDtos;
+﻿using Blog.Core.Contracts.Controllers.Comments;
 using MediatR;
 using System.Collections.Generic;
 

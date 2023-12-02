@@ -1,5 +1,4 @@
 ﻿using Blog.Core.Contracts.Controllers.Categories;
-using Blog.Core.Contracts.ResponseDtos;
 using Blog.Core.Entities;
 using Blog.Infrastructure.Abstract.Interfaces;
 using Blog.Infrastructure.Services.Interfaces;
@@ -67,7 +66,7 @@ public sealed class CategoryService : ICategoryService
             return _mapper.Map<CategoryResponse>(category);
         }
 
-        _logger.LogError("Object with id {id} doesn't exist", id);
+        _logger.LogError("Category object with id {id} doesn't exist", id);
         return null;
     }
 
@@ -101,7 +100,7 @@ public sealed class CategoryService : ICategoryService
             return _mapper.Map<CategoryResponse>(category);
         }
 
-        _logger.LogError("Object with id {id} doesn't exist", id);
+        _logger.LogError("Category object with id {id} doesn't exist", id);
         return null;
     }
 }

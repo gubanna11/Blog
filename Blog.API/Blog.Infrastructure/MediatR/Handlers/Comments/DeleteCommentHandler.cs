@@ -1,4 +1,4 @@
-﻿using Blog.Core.Contracts.ResponseDtos;
+﻿using Blog.Core.Contracts.Controllers.Comments;
 using Blog.Core.MediatR.Commands.Comments;
 using Blog.Infrastructure.Services.Interfaces;
 using MediatR;

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Blog.Core.Contracts.Controllers.Posts;
-using Blog.Core.Contracts.ResponseDtos;
 using Blog.Core.MediatR.Commands.Posts;
 using Blog.Core.MediatR.Queries.Posts;
 using MediatR;

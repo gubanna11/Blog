@@ -1,5 +1,4 @@
 ﻿using Blog.Core.Contracts.Controllers.Comments;
-using Blog.Core.Contracts.ResponseDtos;
 using Blog.Core.Entities;
 using Blog.Infrastructure.Abstract.Interfaces;
 using Blog.Infrastructure.Services.Interfaces;
@@ -62,7 +61,7 @@ public sealed class CommentService : ICommentService
             return _mapper.Map<CommentResponse>(comment);
         }
 
-        _logger.LogError("Object with id {id} doesn't exits", id);
+        _logger.LogError("Comment object with id {id} doesn't exits", id);
         return null;
     }
 
@@ -97,7 +96,7 @@ public sealed class CommentService : ICommentService
             return _mapper.Map<CommentResponse>(comment);
         }
 
-        _logger.LogError("Object with id {id} doesn't exist", id);
+        _logger.LogError("Comment object with id {id} doesn't exist", id);
         return null;
     }
 }

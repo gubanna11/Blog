@@ -1,5 +1,5 @@
 ﻿using System;
-using Blog.Core.Contracts.ResponseDtos;
+using Blog.Core.Contracts.Controllers.Categories;
 using MediatR;
 
 namespace Blog.Core.MediatR.Queries.Categories;

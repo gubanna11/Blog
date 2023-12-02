@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Blog.Core.Validators.Posts;
 
-public class UpdatePostRequestValidator : AbstractValidator<UpdatePostRequest>
+public sealed class UpdatePostRequestValidator : AbstractValidator<UpdatePostRequest>
 {
     public UpdatePostRequestValidator()
     {
