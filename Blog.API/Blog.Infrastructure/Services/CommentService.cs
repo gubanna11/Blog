@@ -1,6 +1,6 @@
 ﻿using Blog.Core.Contracts.Controllers.Comments;
+using Blog.Core.Contracts.ResponseDtos;
 using Blog.Core.Entities;
-using Blog.Core.ResponseDtos;
 using Blog.Infrastructure.Abstract.Interfaces;
 using Blog.Infrastructure.Services.Interfaces;
 using FluentValidation;
@@ -17,20 +17,14 @@ namespace Blog.Infrastructure.Services;
 public sealed class CommentService : ICommentService
 {
     private readonly IUnitOfWork<Comment> _unitOfWork;
-    private readonly IValidator<CreateCommentRequest> _createCommentValidator;
-    private readonly IValidator<UpdateCommentRequest> _updateCommentValidator;
     private readonly ILogger<CommentService> _logger;
     private readonly IMapper _mapper;
 
     public CommentService(IUnitOfWork<Comment> unitOfWork,
-        IValidator<CreateCommentRequest> createCommentValidator,
-        IValidator<UpdateCommentRequest> updateCommentValidator,
         ILogger<CommentService> logger,
         IMapper mapper)
     {
         _unitOfWork = unitOfWork;
-        _createCommentValidator = createCommentValidator;
-        _updateCommentValidator = updateCommentValidator;
         _logger = logger;
         _mapper = mapper;
     }
@@ -43,7 +37,7 @@ public sealed class CommentService : ICommentService
 
         foreach (var comment in comments)
         {
-            if (comment.User != null)
+            if (comment.User is not null)
             {
                 comment.User.Comments = null;
             }
@@ -74,15 +68,10 @@ public sealed class CommentService : ICommentService
 
     public async Task<CommentResponse?> CreateComment(CreateCommentRequest createComment)
     {
-        var result = _createCommentValidator.Validate(createComment);
-        if (!result.IsValid)
-        {
-            _logger.LogError("CreateCommentRequest object errors:\n{errors}", result.Errors.Select(e => e.ErrorMessage));
-            return null;
-        }
-
         Comment comment = _mapper.Map<Comment>(createComment);
+
         comment.PublishDate = DateTime.Now;
+
         await _unitOfWork.GenericRepository.AddAsync(comment);
         await _unitOfWork.SaveChangesAsync();
         return _mapper.Map<CommentResponse>(comment);
@@ -90,17 +79,11 @@ public sealed class CommentService : ICommentService
 
     public async Task<CommentResponse?> UpdateComment(UpdateCommentRequest updateComment)
     {
-        var result = _updateCommentValidator.Validate(updateComment);
-        if (!result.IsValid)
-        {
-            _logger.LogError("UpdateCommentRequest object errors:\n{errors}", result.Errors.Select(e => e.ErrorMessage));
-            return null;
-        }
-
         Comment comment = _mapper.Map<Comment>(updateComment);
 
         _unitOfWork.GenericRepository.Update(comment);
         await _unitOfWork.SaveChangesAsync();
+
         return _mapper.Map<CommentResponse>(comment);
     }
 

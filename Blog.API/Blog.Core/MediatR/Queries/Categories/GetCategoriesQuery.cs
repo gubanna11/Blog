@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Blog.Core.ResponseDtos;
+using Blog.Core.Contracts.ResponseDtos;
 using MediatR;
 
 namespace Blog.Core.MediatR.Queries.Categories;

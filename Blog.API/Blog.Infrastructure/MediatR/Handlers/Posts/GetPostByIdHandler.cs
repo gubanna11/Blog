@@ -1,5 +1,5 @@
-﻿using Blog.Core.MediatR.Queries.Posts;
-using Blog.Core.ResponseDtos;
+﻿using Blog.Core.Contracts.ResponseDtos;
+using Blog.Core.MediatR.Queries.Posts;
 using Blog.Infrastructure.Services.Interfaces;
 using MediatR;
 using System.Threading;

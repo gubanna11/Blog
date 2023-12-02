@@ -1,5 +1,5 @@
-﻿using Blog.Core.MediatR.Commands.Comments;
-using Blog.Core.ResponseDtos;
+﻿using Blog.Core.Contracts.ResponseDtos;
+using Blog.Core.MediatR.Commands.Comments;
 using Blog.Infrastructure.Services.Interfaces;
 using MediatR;
 using System.Threading;

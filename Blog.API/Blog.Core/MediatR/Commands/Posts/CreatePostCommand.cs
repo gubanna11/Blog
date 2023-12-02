@@ -1,5 +1,5 @@
 ﻿using Blog.Core.Contracts.Controllers.Posts;
-using Blog.Core.ResponseDtos;
+using Blog.Core.Contracts.ResponseDtos;
 using MediatR;
 
 namespace Blog.Core.MediatR.Commands.Posts;

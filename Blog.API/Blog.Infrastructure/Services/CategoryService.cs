@@ -1,6 +1,6 @@
 ﻿using Blog.Core.Contracts.Controllers.Categories;
+using Blog.Core.Contracts.ResponseDtos;
 using Blog.Core.Entities;
-using Blog.Core.ResponseDtos;
 using Blog.Infrastructure.Abstract.Interfaces;
 using Blog.Infrastructure.Services.Interfaces;
 using FluentValidation;
@@ -17,20 +17,14 @@ namespace Blog.Infrastructure.Services;
 public sealed class CategoryService : ICategoryService
 {
     private readonly IUnitOfWork<Category> _unitOfWork;
-    private readonly IValidator<CreateCategoryRequest> _createCategoryValidator;
-    private readonly IValidator<UpdateCategoryRequest> _updateCategoryValidator;
     private readonly ILogger _logger;
     private readonly IMapper _mapper;
 
     public CategoryService(IUnitOfWork<Category> unitOfWork,
-        IValidator<CreateCategoryRequest> createCategoryValidator,
-        IValidator<UpdateCategoryRequest> updateCategoryValidator,
         ILogger<CategoryService> logger,
         IMapper mapper)
     {
         _unitOfWork = unitOfWork;
-        _createCategoryValidator = createCategoryValidator;
-        _updateCategoryValidator = updateCategoryValidator;
         _logger = logger;
         _mapper = mapper;
     }
@@ -43,7 +37,7 @@ public sealed class CategoryService : ICategoryService
 
         foreach (var category in categories)
         {
-            if (category.Posts != null)
+            if (category.Posts is not null)
             {
                 foreach (Post post in category.Posts)
                 {
@@ -63,7 +57,7 @@ public sealed class CategoryService : ICategoryService
 
         if (category is not null)
         {
-            if (category.Posts != null)
+            if (category.Posts is not null)
             {
                 foreach (Post post in category.Posts)
                 {
@@ -74,38 +68,26 @@ public sealed class CategoryService : ICategoryService
         }
 
         _logger.LogError("Object with id {id} doesn't exist", id);
-        return null;        
+        return null;
     }
 
     public async Task<CategoryResponse?> CreateCategory(CreateCategoryRequest createCategory)
     {
-        var result = _createCategoryValidator.Validate(createCategory);
-        if (!result.IsValid)
-        {
-            _logger.LogError("CreateCategoryRequest object errors:\n{errors}", result.Errors.Select(e => e.ErrorMessage));
-            return null;
-        }
-
         Category category = _mapper.Map<Category>(createCategory);
 
         await _unitOfWork.GenericRepository.AddAsync(category);
         await _unitOfWork.SaveChangesAsync();
+
         return _mapper.Map<CategoryResponse>(category);
     }
 
     public async Task<CategoryResponse?> UpdateCategory(UpdateCategoryRequest updateCategory)
     {
-        var result = _updateCategoryValidator.Validate(updateCategory);
-        if (!result.IsValid)
-        {
-            _logger.LogError("UpdateCategoryRequest object errors:\n{errors}", result.Errors.Select(e => e.ErrorMessage));
-            return null;
-        }
-
         Category category = _mapper.Map<Category>(updateCategory);
 
         _unitOfWork.GenericRepository.Update(category);
         await _unitOfWork.SaveChangesAsync();
+
         return _mapper.Map<CategoryResponse>(category);
     }
 

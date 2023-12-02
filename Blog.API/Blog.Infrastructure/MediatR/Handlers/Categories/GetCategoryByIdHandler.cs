@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using Blog.Core.Contracts.ResponseDtos;
 using Blog.Core.MediatR.Queries.Categories;
-using Blog.Core.ResponseDtos;
 using Blog.Infrastructure.Services.Interfaces;
 using MediatR;
 

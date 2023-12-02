@@ -15,8 +15,7 @@ public class UpdatePostRequestValidator : AbstractValidator<UpdatePostRequest>
             .MaximumLength(500);
 
         RuleFor(p => p.Content)
-            .NotEmpty()
-            .MinimumLength(50)
+            .MinimumLength(10)
             .MaximumLength(120000);
 
         RuleFor(p => p.UserId)

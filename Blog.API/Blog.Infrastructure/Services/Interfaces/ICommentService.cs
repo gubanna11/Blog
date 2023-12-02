@@ -1,5 +1,5 @@
 ﻿using Blog.Core.Contracts.Controllers.Comments;
-using Blog.Core.ResponseDtos;
+using Blog.Core.Contracts.ResponseDtos;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
