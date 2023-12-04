@@ -66,7 +66,7 @@ public sealed class CategoryService : ICategoryService
             return _mapper.Map<CategoryResponse>(category);
         }
 
-        _logger.LogError("Category object with id {id} doesn't exist", id);
+        _logger.LogError("Category object with id {GetByIdCategoryId} doesn't exist", id);
         return null;
     }
 
@@ -100,7 +100,7 @@ public sealed class CategoryService : ICategoryService
             return _mapper.Map<CategoryResponse>(category);
         }
 
-        _logger.LogError("Category object with id {id} doesn't exist", id);
+        _logger.LogError("Category object with id {DeleteCategoryId} doesn't exist", id);
         return null;
     }
 }

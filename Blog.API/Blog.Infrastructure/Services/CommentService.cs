@@ -61,7 +61,7 @@ public sealed class CommentService : ICommentService
             return _mapper.Map<CommentResponse>(comment);
         }
 
-        _logger.LogError("Comment object with id {id} doesn't exits", id);
+        _logger.LogError("Comment object with id {GetByIdCommentId} doesn't exits", id);
         return null;
     }
 
@@ -96,7 +96,7 @@ public sealed class CommentService : ICommentService
             return _mapper.Map<CommentResponse>(comment);
         }
 
-        _logger.LogError("Comment object with id {id} doesn't exist", id);
+        _logger.LogError("Comment object with id {DeleteCommentId} doesn't exist", id);
         return null;
     }
 }

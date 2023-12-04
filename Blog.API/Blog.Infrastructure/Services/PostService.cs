@@ -74,7 +74,7 @@ public sealed class PostService : IPostService
             return _mapper.Map<PostResponse>(post);
         }
 
-        _logger.LogError("Post object with id {id} doesn't exits", id);
+        _logger.LogError("Post object with id {GetByIdPostId} doesn't exits", id);
         return null;
     }
 
@@ -110,7 +110,7 @@ public sealed class PostService : IPostService
             return _mapper.Map<PostResponse>(post);
         }
 
-        _logger.LogError("Post object with id {id} doesn't exist", id);
+        _logger.LogError("Post object with id {DeletePostId} doesn't exist", id);
         return null;
     }
 }
