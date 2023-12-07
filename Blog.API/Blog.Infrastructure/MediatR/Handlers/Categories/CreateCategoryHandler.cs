@@ -26,7 +26,7 @@ public sealed class CreateCategoryHandler : IRequestHandler<CreateCategoryComman
 
         if(responseCategory is null)
         {
-            _logger.LogWarning("Category wasn't created");
+            _logger.LogError("Category wasn't created");
         }
         else
         {

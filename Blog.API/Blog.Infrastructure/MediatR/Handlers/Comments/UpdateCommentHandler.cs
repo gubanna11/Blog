@@ -26,7 +26,7 @@ public sealed class UpdateCommentHandler : IRequestHandler<UpdateCommentCommand,
 
         if (responseComment is null)
         {
-            _logger.LogWarning("Comment wasn't updated");
+            _logger.LogError("Comment wasn't updated with id {FailedUpdateCommentId}", request.Comment.CommentId);
         }
         else
         {

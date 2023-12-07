@@ -16,15 +16,12 @@ namespace Blog.Infrastructure.Services;
 public sealed class PostService : IPostService
 {
     private readonly IUnitOfWork<Post> _unitOfWork;
-    private readonly ILogger _logger;
     private readonly IMapper _mapper;
 
     public PostService(IUnitOfWork<Post> unitOfWork,
-        ILogger<PostService> logger,
         IMapper mapper)
     {
         _unitOfWork = unitOfWork;
-        _logger = logger;
         _mapper = mapper;
     }
 
@@ -74,7 +71,6 @@ public sealed class PostService : IPostService
             return _mapper.Map<PostResponse>(post);
         }
 
-        _logger.LogError("Post object with id {GetByIdPostId} doesn't exits", id);
         return null;
     }
 
@@ -110,7 +106,6 @@ public sealed class PostService : IPostService
             return _mapper.Map<PostResponse>(post);
         }
 
-        _logger.LogError("Post object with id {DeletePostId} doesn't exist", id);
         return null;
     }
 }

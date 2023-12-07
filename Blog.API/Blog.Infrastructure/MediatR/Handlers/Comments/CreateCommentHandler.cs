@@ -26,7 +26,7 @@ public sealed class CreateCommentHandler : IRequestHandler<CreateCommentCommand,
 
         if(responseComment is null)
         {
-            _logger.LogWarning("Comment wasn't created");
+            _logger.LogError("Comment wasn't created");
         }
         else
         {

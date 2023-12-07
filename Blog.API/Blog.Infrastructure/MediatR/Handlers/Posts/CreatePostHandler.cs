@@ -26,7 +26,7 @@ public sealed class CreatePostHandler : IRequestHandler<CreatePostCommand, PostR
 
         if(responsePost is null)
         {
-            _logger.LogWarning("Post wasn't created");
+            _logger.LogError("Post wasn't created");
         }
         else
         {

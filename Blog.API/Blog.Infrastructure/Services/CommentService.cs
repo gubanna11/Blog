@@ -16,15 +16,12 @@ namespace Blog.Infrastructure.Services;
 public sealed class CommentService : ICommentService
 {
     private readonly IUnitOfWork<Comment> _unitOfWork;
-    private readonly ILogger<CommentService> _logger;
     private readonly IMapper _mapper;
 
     public CommentService(IUnitOfWork<Comment> unitOfWork,
-        ILogger<CommentService> logger,
         IMapper mapper)
     {
         _unitOfWork = unitOfWork;
-        _logger = logger;
         _mapper = mapper;
     }
 
@@ -61,7 +58,6 @@ public sealed class CommentService : ICommentService
             return _mapper.Map<CommentResponse>(comment);
         }
 
-        _logger.LogError("Comment object with id {GetByIdCommentId} doesn't exits", id);
         return null;
     }
 
@@ -96,7 +92,6 @@ public sealed class CommentService : ICommentService
             return _mapper.Map<CommentResponse>(comment);
         }
 
-        _logger.LogError("Comment object with id {DeleteCommentId} doesn't exist", id);
         return null;
     }
 }

@@ -26,7 +26,7 @@ public sealed class UpdatePostHandler : IRequestHandler<UpdatePostCommand, PostR
 
         if (responsePost is null)
         {
-            _logger.LogWarning("Post wasn't updated");
+            _logger.LogError("Post wasn't updated with id {FailedUpdatePostId}", request.Post.PostId);
         }
         else
         {

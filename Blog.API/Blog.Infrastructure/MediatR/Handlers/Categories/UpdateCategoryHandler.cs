@@ -26,7 +26,7 @@ public sealed class UpdateCategoryHandler : IRequestHandler<UpdateCategoryComman
 
         if (responseCategory is null)
         {
-            _logger.LogWarning("Category wasn't updated");
+            _logger.LogError("Category wasn't updated with id {FailedUpdateCategoryId}", request.Category.CategoryId);
         }
         else
         {

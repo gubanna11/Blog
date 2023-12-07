@@ -16,15 +16,12 @@ namespace Blog.Infrastructure.Services;
 public sealed class CategoryService : ICategoryService
 {
     private readonly IUnitOfWork<Category> _unitOfWork;
-    private readonly ILogger _logger;
     private readonly IMapper _mapper;
 
     public CategoryService(IUnitOfWork<Category> unitOfWork,
-        ILogger<CategoryService> logger,
         IMapper mapper)
     {
         _unitOfWork = unitOfWork;
-        _logger = logger;
         _mapper = mapper;
     }
 
@@ -66,7 +63,6 @@ public sealed class CategoryService : ICategoryService
             return _mapper.Map<CategoryResponse>(category);
         }
 
-        _logger.LogError("Category object with id {GetByIdCategoryId} doesn't exist", id);
         return null;
     }
 
@@ -100,7 +96,6 @@ public sealed class CategoryService : ICategoryService
             return _mapper.Map<CategoryResponse>(category);
         }
 
-        _logger.LogError("Category object with id {DeleteCategoryId} doesn't exist", id);
         return null;
     }
 }
