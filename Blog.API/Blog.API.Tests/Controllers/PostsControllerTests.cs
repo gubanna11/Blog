@@ -1,6 +1,5 @@
 ﻿using Blog.API.Controllers;
 using Blog.Core.Contracts.Controllers.Posts;
-using Blog.Core.Entities;
 using Blog.Core.MediatR.Commands.Posts;
 using Blog.Core.MediatR.Queries.Posts;
 using Bogus;
@@ -12,13 +11,13 @@ namespace Blog.API.Tests.Controllers;
 public sealed class PostsControllerTests
 {
     private readonly PostsController _controller;
-    private readonly Mock<IMediator> _mediator;
+    private readonly IMediator _mediator;
     private readonly Faker<PostResponse> _postFaker;
 
     public PostsControllerTests()
     {
-        _mediator = new Mock<IMediator>();
-        _controller = new PostsController(_mediator.Object);
+        _mediator = Substitute.For<IMediator>();
+        _controller = new PostsController(_mediator);
         _postFaker = new Faker<PostResponse>()
             .RuleFor(p => p.PostId, f => f.Random.Guid())
             .RuleFor(p => p.Title, f => f.Lorem.Sentence(5))
@@ -32,17 +31,17 @@ public sealed class PostsControllerTests
     #region CreatePost
 
     [Fact]
-    public void CreatePost_WhenCalled_ReturnOk()
+    public async void CreatePost_WhenCalled_ReturnOk()
     {
         //Arrange
         var post = _postFaker.Generate();
         CreatePostRequest createPost = new(post.Title, post.Content, post.UserId, post.IsActive, post.CategoryId);
 
-        _mediator.Setup(m => m.Send(It.IsAny<CreatePostCommand>(), default))
-            .ReturnsAsync(post);
+        _mediator.Send(Arg.Any<CreatePostCommand>())
+            .ReturnsForAnyArgs(post);
 
         //Act
-        var response = (_controller.CreatePost(createPost, CancellationToken.None).Result as OkObjectResult)!;
+        var response = (await _controller.CreatePost(createPost, CancellationToken.None) as OkObjectResult)!;
         var result = (response.Value as PostResponse)!;
 
         //Assert
@@ -58,16 +57,16 @@ public sealed class PostsControllerTests
     #region GetPosts
 
     [Fact]
-    public void GetPosts_WhenCalled_ReturnOk()
+    public async void GetPosts_WhenCalled_ReturnOk()
     {
         //Arrange
         var posts = _postFaker.Generate(10);
 
-        _mediator.Setup(m => m.Send(It.IsAny<GetPostsQuery>(), default))
-            .ReturnsAsync(posts);
+        _mediator.Send(Arg.Any<GetPostsQuery>())
+            .ReturnsForAnyArgs(posts);
 
         //Act
-        var response = (_controller.GetPosts(CancellationToken.None).Result as OkObjectResult)!;
+        var response = (await _controller.GetPosts(CancellationToken.None) as OkObjectResult)!;
         var result = response.Value as List<PostResponse>;
 
         //Assert
@@ -78,16 +77,16 @@ public sealed class PostsControllerTests
     }
 
     [Fact]
-    public void GetPosts_WhenCalled_ReturnNotFound()
+    public async void GetPosts_WhenCalled_ReturnNotFound()
     {
         //Arrange
         var posts = _postFaker.Generate(0);
 
-        _mediator.Setup(m => m.Send(It.IsAny<GetPostsQuery>(), default))
-            .ReturnsAsync(posts);
+        _mediator.Send(Arg.Any<GetPostsQuery>())
+            .ReturnsForAnyArgs(posts);
 
         //Act
-        var response = _controller.GetPosts(CancellationToken.None).Result as NotFoundResult;
+        var response = await _controller.GetPosts(CancellationToken.None) as NotFoundResult;
 
         //Assert
         response.Should().BeOfType<NotFoundResult>();
@@ -98,17 +97,16 @@ public sealed class PostsControllerTests
     #region GetPost
 
     [Fact]
-    public void GetPost_WhenCalled_ReturnOk()
+    public async void GetPost_WhenCalled_ReturnOk()
     {
         //Arrange
         var post = _postFaker.Generate();
 
-        _mediator.Setup(m => m.Send(It.IsAny<GetPostByIdQuery>(), default))
-            .ReturnsAsync(post);
+        _mediator.Send(Arg.Any<GetPostByIdQuery>())
+            .ReturnsForAnyArgs(post);
 
         //Act
-        var response =
-            (_controller.GetPostById(post.PostId, CancellationToken.None).Result as OkObjectResult)!;
+        var response = (await _controller.GetPostById(post.PostId, CancellationToken.None) as OkObjectResult)!;
         var result = response.Value as PostResponse;
 
         //Assert
@@ -118,14 +116,14 @@ public sealed class PostsControllerTests
     }
 
     [Fact]
-    public void GetPost_WhenCalled_ReturnNotFound()
+    public async void GetPost_WhenCalled_ReturnNotFound()
     {
         //Arrange
-        _mediator.Setup(m => m.Send(It.IsAny<GetPostByIdQuery>(), default))
-            .ReturnsAsync((PostResponse)null!);
+        _mediator.Send(Arg.Any<GetPostByIdQuery>())
+            .ReturnsForAnyArgs((PostResponse)null!);
 
         //Act
-        var response = _controller.GetPostById(Guid.NewGuid(), CancellationToken.None).Result as NotFoundResult;
+        var response = await _controller.GetPostById(Guid.NewGuid(), CancellationToken.None) as NotFoundResult;
 
         //Assert
         response.Should().BeOfType<NotFoundResult>();
@@ -136,18 +134,18 @@ public sealed class PostsControllerTests
     #region UpdatePost
 
     [Fact]
-    public void UpdatePost_WhenCalled_ReturnOk()
+    public async void UpdatePost_WhenCalled_ReturnOk()
     {
         //Arrange
         var post = _postFaker.Generate();
         UpdatePostRequest updatePost = new(post.PostId, post.Title, post.Content, post.UserId, post.PublishDate,
             post.IsActive, post.CategoryId);
 
-        _mediator.Setup(m => m.Send(It.IsAny<UpdatePostCommand>(), default))
-            .ReturnsAsync(post);
+        _mediator.Send(Arg.Any<UpdatePostCommand>())
+            .ReturnsForAnyArgs(post);
 
         //Act
-        var response = (_controller.UpdatePost(updatePost, CancellationToken.None).Result as OkObjectResult)!;
+        var response = (await _controller.UpdatePost(updatePost, CancellationToken.None) as OkObjectResult)!;
         var result = response.Value as PostResponse;
 
         //Assert
@@ -157,18 +155,18 @@ public sealed class PostsControllerTests
     }
 
     [Fact]
-    public void UpdatePost_WhenCalled_ReturnNotFound()
+    public async void UpdatePost_WhenCalled_ReturnNotFound()
     {
         //Arrange
         var post = _postFaker.Generate();
         UpdatePostRequest updatePost = new(post.PostId, post.Title, post.Content, post.UserId, post.PublishDate,
             post.IsActive, post.CategoryId);
 
-        _mediator.Setup(m => m.Send(It.IsAny<UpdatePostCommand>(), default))
-            .ReturnsAsync((PostResponse)null!);
+        _mediator.Send(Arg.Any<UpdatePostCommand>())
+            .ReturnsForAnyArgs((PostResponse)null!);
 
         //Act
-        var response = _controller.UpdatePost(updatePost, CancellationToken.None).Result as NotFoundResult;
+        var response = await _controller.UpdatePost(updatePost, CancellationToken.None) as NotFoundResult;
 
         //Assert
         response.Should().BeOfType<NotFoundResult>();
@@ -179,17 +177,17 @@ public sealed class PostsControllerTests
     #region DeletePost
 
     [Fact]
-    public void DeletePost_WhenCalled_ReturnOk()
+    public async void DeletePost_WhenCalled_ReturnOk()
     {
         //Arrange
         var post = _postFaker.Generate();
 
-        _mediator.Setup(m => m.Send(It.IsAny<DeletePostCommand>(), default))
-            .ReturnsAsync(post);
+        _mediator.Send(Arg.Any<DeletePostCommand>())
+            .ReturnsForAnyArgs(post);
 
         //Act
         var response =
-            (_controller.DeletePost(post.PostId, CancellationToken.None).Result as OkObjectResult)!;
+            (await _controller.DeletePost(post.PostId, CancellationToken.None) as OkObjectResult)!;
         var result = response.Value as PostResponse;
 
         //Assert
@@ -198,14 +196,14 @@ public sealed class PostsControllerTests
     }
 
     [Fact]
-    public void DeletePost_WhenCalled_ReturnNotFound()
+    public async void DeletePost_WhenCalled_ReturnNotFound()
     {
         //Arrange
-        _mediator.Setup(m => m.Send(It.IsAny<DeletePostCommand>(), default))
-            .ReturnsAsync((PostResponse)null!);
+        _mediator.Send(Arg.Any<DeletePostCommand>())
+            .ReturnsForAnyArgs((PostResponse)null!);
 
         //Act
-        var response = _controller.DeletePost(Guid.NewGuid(), CancellationToken.None).Result as NotFoundResult;
+        var response = await _controller.DeletePost(Guid.NewGuid(), CancellationToken.None) as NotFoundResult;
 
         //Assert
         response.Should().BeOfType<NotFoundResult>();

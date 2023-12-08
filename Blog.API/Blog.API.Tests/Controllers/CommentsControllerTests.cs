@@ -1,6 +1,5 @@
 ﻿using Blog.API.Controllers;
 using Blog.Core.Contracts.Controllers.Comments;
-using Blog.Core.Entities;
 using Blog.Core.MediatR.Commands.Comments;
 using Blog.Core.MediatR.Queries.Comments;
 using Bogus;
@@ -13,12 +12,12 @@ public sealed class CommentsControllerTests
 {
     private readonly Faker<CommentResponse> _commentFaker;
     private readonly CommentsController _controller;
-    private readonly Mock<IMediator> _mediator;
+    private readonly IMediator _mediator;
 
     public CommentsControllerTests()
     {
-        _mediator = new Mock<IMediator>();
-        _controller = new CommentsController(_mediator.Object);
+        _mediator = Substitute.For<IMediator>();
+        _controller = new CommentsController(_mediator);
         _commentFaker = new Faker<CommentResponse>()
             .RuleFor(c => c.CommentId, f => f.Random.Guid())
             .RuleFor(c => c.Content, f => f.Lorem.Paragraph())
@@ -31,17 +30,17 @@ public sealed class CommentsControllerTests
     #region CreateComment
 
     [Fact]
-    public void CreateComment_WhenCalled_ReturnOk()
+    public async void CreateComment_WhenCalled_ReturnOk()
     {
         //Arrange
         var comment = _commentFaker.Generate();
         CreateCommentRequest createComment = new(comment.Content, comment.PostId, comment.UserId, comment.ParentCommentId);
 
-        _mediator.Setup(m => m.Send(It.IsAny<CreateCommentCommand>(), default))
-            .ReturnsAsync(comment);
+        _mediator.Send(Arg.Any<CreateCommentCommand>())
+            .ReturnsForAnyArgs(comment);
 
         //Act
-        var response = (_controller.CreateComment(createComment, CancellationToken.None).Result as OkObjectResult)!;
+        var response = (await _controller.CreateComment(createComment, CancellationToken.None) as OkObjectResult)!;
         var result = response.Value as CommentResponse;
 
         //Assert
@@ -57,16 +56,16 @@ public sealed class CommentsControllerTests
     #region GetComments
 
     [Fact]
-    public void GetComments_WhenCalled_ReturnOk()
+    public async void GetComments_WhenCalled_ReturnOk()
     {
         //Arrange
         var comments = _commentFaker.Generate(10);
 
-        _mediator.Setup(m => m.Send(It.IsAny<GetCommentsQuery>(), default))
-            .ReturnsAsync(comments);
+        _mediator.Send(Arg.Any<GetCommentsQuery>())
+            .ReturnsForAnyArgs(comments);
 
         //Act
-        var response = (_controller.GetComments(CancellationToken.None).Result as OkObjectResult)!;
+        var response = (await _controller.GetComments(CancellationToken.None) as OkObjectResult)!;
         var result = response.Value as List<CommentResponse>;
 
         //Assert
@@ -77,16 +76,16 @@ public sealed class CommentsControllerTests
     }
 
     [Fact]
-    public void GetComments_WhenCalled_ReturnNotFound()
+    public async void GetComments_WhenCalled_ReturnNotFound()
     {
         //Arrange
         var comments = _commentFaker.Generate(0);
 
-        _mediator.Setup(m => m.Send(It.IsAny<GetCommentsQuery>(), default))
-            .ReturnsAsync(comments);
+        _mediator.Send(Arg.Any<GetCommentsQuery>())
+            .ReturnsForAnyArgs(comments);
 
         //Act
-        var response = _controller.GetComments(CancellationToken.None).Result as NotFoundResult;
+        var response = await _controller.GetComments(CancellationToken.None) as NotFoundResult;
 
         //Assert
         response.Should().BeOfType<NotFoundResult>();
@@ -97,17 +96,17 @@ public sealed class CommentsControllerTests
     #region GetComment
 
     [Fact]
-    public void GetComment_WhenCalled_ReturnOk()
+    public async void GetComment_WhenCalled_ReturnOk()
     {
         //Arrange
         var comment = _commentFaker.Generate();
 
-        _mediator.Setup(m => m.Send(It.IsAny<GetCommentByIdQuery>(), default))
-            .ReturnsAsync(comment);
+        _mediator.Send(Arg.Any<GetCommentByIdQuery>())
+            .ReturnsForAnyArgs(comment);
 
         //Act
         var response =
-            (_controller.GetCommentById(comment.CommentId, CancellationToken.None).Result as OkObjectResult)!;
+            (await _controller.GetCommentById(comment.CommentId, CancellationToken.None) as OkObjectResult)!;
         var result = response.Value as CommentResponse;
 
         //Assert
@@ -117,14 +116,14 @@ public sealed class CommentsControllerTests
     }
 
     [Fact]
-    public void GetComment_WhenCalled_ReturnNotFound()
+    public async void GetComment_WhenCalled_ReturnNotFound()
     {
         //Arrange
-        _mediator.Setup(m => m.Send(It.IsAny<GetCommentByIdQuery>(), default))
-            .ReturnsAsync((CommentResponse)null!);
+        _mediator.Send(Arg.Any<GetCommentByIdQuery>())
+            .ReturnsForAnyArgs((CommentResponse)null!);
 
         //Act
-        var response = _controller.GetCommentById(Guid.NewGuid(), CancellationToken.None).Result as NotFoundResult;
+        var response = await _controller.GetCommentById(Guid.NewGuid(), CancellationToken.None) as NotFoundResult;
 
         //Assert
         response.Should().BeOfType<NotFoundResult>();
@@ -135,18 +134,18 @@ public sealed class CommentsControllerTests
     #region UpdateComment
 
     [Fact]
-    public void UpdateComment_WhenCalled_ReturnOk()
+    public async void UpdateComment_WhenCalled_ReturnOk()
     {
         //Arrange
         var comment = _commentFaker.Generate();
         UpdateCommentRequest updateComment = new(comment.CommentId, comment.Content, comment.PostId, comment.UserId,
             comment.PublishDate, comment.ParentCommentId);
 
-        _mediator.Setup(m => m.Send(It.IsAny<UpdateCommentCommand>(), default))
-            .ReturnsAsync(comment);
+        _mediator.Send(Arg.Any<UpdateCommentCommand>())
+            .ReturnsForAnyArgs(comment);
 
         //Act
-        var response = (_controller.UpdateComment(updateComment, CancellationToken.None).Result as OkObjectResult)!;
+        var response = (await _controller.UpdateComment(updateComment, CancellationToken.None) as OkObjectResult)!;
         var result = response.Value as CommentResponse;
 
         //Assert
@@ -156,18 +155,18 @@ public sealed class CommentsControllerTests
     }
 
     [Fact]
-    public void UpdateComment_WhenCalled_ReturnNotFound()
+    public async void UpdateComment_WhenCalled_ReturnNotFound()
     {
         //Arrange
         var comment = _commentFaker.Generate();
         UpdateCommentRequest updateComment = new(comment.CommentId, comment.Content, comment.PostId, comment.UserId,
             comment.PublishDate, comment.ParentCommentId);
 
-        _mediator.Setup(m => m.Send(It.IsAny<UpdateCommentCommand>(), default))
-            .ReturnsAsync((CommentResponse)null!);
+        _mediator.Send(Arg.Any<UpdateCommentCommand>())
+            .ReturnsForAnyArgs((CommentResponse)null!);
 
         //Act
-        var response = _controller.UpdateComment(updateComment, CancellationToken.None).Result as NotFoundResult;
+        var response = await _controller.UpdateComment(updateComment, CancellationToken.None) as NotFoundResult;
 
         //Assert
         response.Should().BeOfType<NotFoundResult>();
@@ -178,17 +177,17 @@ public sealed class CommentsControllerTests
     #region DeleteComment
 
     [Fact]
-    public void DeleteComment_WhenCalled_ReturnOk()
+    public async void DeleteComment_WhenCalled_ReturnOk()
     {
         //Arrange
         var comment = _commentFaker.Generate();
 
-        _mediator.Setup(m => m.Send(It.IsAny<DeleteCommentCommand>(), default))
-            .ReturnsAsync(comment);
+        _mediator.Send(Arg.Any<DeleteCommentCommand>())
+            .ReturnsForAnyArgs(comment);
 
         //Act
         var response =
-            (_controller.DeleteComment(comment.CommentId, CancellationToken.None).Result as OkObjectResult)!;
+            (await _controller.DeleteComment(comment.CommentId, CancellationToken.None) as OkObjectResult)!;
         var result = response.Value as CommentResponse;
 
         //Assert
@@ -197,14 +196,14 @@ public sealed class CommentsControllerTests
     }
 
     [Fact]
-    public void DeleteComment_WhenCalled_ReturnNotFound()
+    public async void DeleteComment_WhenCalled_ReturnNotFound()
     {
         //Arrange
-        _mediator.Setup(m => m.Send(It.IsAny<DeleteCommentCommand>(), default))
-            .ReturnsAsync((CommentResponse)null!);
+        _mediator.Send(Arg.Any<DeleteCommentCommand>())
+            .ReturnsForAnyArgs((CommentResponse)null!);
 
         //Act
-        var response = _controller.DeleteComment(Guid.NewGuid(), CancellationToken.None).Result as NotFoundResult;
+        var response = await _controller.DeleteComment(Guid.NewGuid(), CancellationToken.None) as NotFoundResult;
 
         //Assert
         response.Should().BeOfType<NotFoundResult>();
