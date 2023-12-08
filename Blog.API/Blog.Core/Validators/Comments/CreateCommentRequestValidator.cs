@@ -1,15 +1,12 @@
-﻿using Blog.Core.Entities;
+﻿using Blog.Core.Contracts.Controllers.Comments;
 using FluentValidation;
 
 namespace Blog.Core.Validators.Comments;
 
-public sealed class CommentEntityValidator : AbstractValidator<Comment>
+public sealed class CreateCommentRequestValidator : AbstractValidator<CreateCommentRequest>
 {
-    public CommentEntityValidator()
+    public CreateCommentRequestValidator()
     {
-        RuleFor(c => c.CommentId)
-            .NotEmpty();
-
         RuleFor(c => c.Content)
             .NotEmpty()
             .MaximumLength(50000);
@@ -19,8 +16,5 @@ public sealed class CommentEntityValidator : AbstractValidator<Comment>
 
         RuleFor(p => p.UserId)
             .NotEmpty();
-
-        RuleFor(p => p.PublishDate)
-            .NotNull();
     }
 }

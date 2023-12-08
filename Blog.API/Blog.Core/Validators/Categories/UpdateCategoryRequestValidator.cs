@@ -1,11 +1,11 @@
-﻿using Blog.Core.Entities;
+﻿using Blog.Core.Contracts.Controllers.Categories;
 using FluentValidation;
 
 namespace Blog.Core.Validators.Categories;
 
-public sealed class CategoryEntityValidator : AbstractValidator<Category>
+public sealed class UpdateCategoryRequestValidator : AbstractValidator<UpdateCategoryRequest>
 {
-    public CategoryEntityValidator()
+    public UpdateCategoryRequestValidator()
     {
         RuleFor(c => c.CategoryId)
             .NotEmpty();

@@ -1,11 +1,11 @@
-﻿using Blog.Core.Entities;
+﻿using Blog.Core.Contracts.Controllers.Posts;
 using FluentValidation;
 
 namespace Blog.Core.Validators.Posts;
 
-public sealed class PostEntityValidator : AbstractValidator<Post>
+public sealed class UpdatePostRequestValidator : AbstractValidator<UpdatePostRequest>
 {
-    public PostEntityValidator()
+    public UpdatePostRequestValidator()
     {
         RuleFor(p => p.PostId)
             .NotEmpty();
@@ -15,15 +15,11 @@ public sealed class PostEntityValidator : AbstractValidator<Post>
             .MaximumLength(500);
 
         RuleFor(p => p.Content)
-            .NotEmpty()
-            .MinimumLength(50)
+            .MinimumLength(10)
             .MaximumLength(120000);
 
         RuleFor(p => p.UserId)
             .NotEmpty();
-
-        RuleFor(p => p.PublishDate)
-            .NotNull();
 
         RuleFor(p => p.IsActive)
             .NotEmpty();

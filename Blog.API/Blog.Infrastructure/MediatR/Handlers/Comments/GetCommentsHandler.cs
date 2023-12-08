@@ -1,14 +1,14 @@
-﻿using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using Blog.Core.Entities;
+﻿using Blog.Core.Contracts.Controllers.Comments;
 using Blog.Core.MediatR.Queries.Comments;
 using Blog.Infrastructure.Services.Interfaces;
 using MediatR;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Blog.Infrastructure.MediatR.Handlers.Comments;
 
-public sealed class GetCommentsHandler : IRequestHandler<GetCommentsQuery, IEnumerable<Comment>>
+public sealed class GetCommentsHandler : IRequestHandler<GetCommentsQuery, IEnumerable<CommentResponse>>
 {
     private readonly ICommentService _commentService;
 
@@ -17,10 +17,10 @@ public sealed class GetCommentsHandler : IRequestHandler<GetCommentsQuery, IEnum
         _commentService = commentService;
     }
 
-    public Task<IEnumerable<Comment>> Handle(GetCommentsQuery request, CancellationToken cancellationToken)
+    public async Task<IEnumerable<CommentResponse>> Handle(GetCommentsQuery request, CancellationToken cancellationToken)
     {
-        var comments = _commentService.GetComments();
+        var comments = await _commentService.GetComments();
 
-        return Task.FromResult(comments);
+        return comments;
     }
 }

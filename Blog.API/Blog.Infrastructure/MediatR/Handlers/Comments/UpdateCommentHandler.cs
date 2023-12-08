@@ -1,28 +1,37 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using Blog.Core.Entities;
+﻿using Blog.Core.Contracts.Controllers.Comments;
 using Blog.Core.MediatR.Commands.Comments;
 using Blog.Infrastructure.Services.Interfaces;
-using MapsterMapper;
 using MediatR;
+using Microsoft.Extensions.Logging;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Blog.Infrastructure.MediatR.Handlers.Comments;
 
-public sealed class UpdateCommentHandler : IRequestHandler<UpdateCommentCommand, Comment?>
+public sealed class UpdateCommentHandler : IRequestHandler<UpdateCommentCommand, CommentResponse?>
 {
     private readonly ICommentService _commentService;
-    private readonly IMapper _mapper;
+    private readonly ILogger _logger;
 
-    public UpdateCommentHandler(ICommentService commentService, IMapper mapper)
+    public UpdateCommentHandler(ICommentService commentService,
+        ILogger<UpdateCommentHandler> logger)
     {
         _commentService = commentService;
-        _mapper = mapper;
+        _logger = logger;
     }
 
-    public async Task<Comment?> Handle(UpdateCommentCommand request, CancellationToken cancellationToken)
+    public async Task<CommentResponse?> Handle(UpdateCommentCommand request, CancellationToken cancellationToken)
     {
-        var comment = _mapper.Map<Comment>(request.Comment);
-        var responseComment = await _commentService.UpdateComment(comment);
+        var responseComment = await _commentService.UpdateComment(request.Comment);
+
+        if (responseComment is null)
+        {
+            _logger.LogError("Comment wasn't updated with id {FailedUpdateCommentId}", request.Comment.CommentId);
+        }
+        else
+        {
+            _logger.LogInformation("Comment was updated with id {UpdatedCommentId}", responseComment.CommentId);
+        }
 
         return responseComment;
     }

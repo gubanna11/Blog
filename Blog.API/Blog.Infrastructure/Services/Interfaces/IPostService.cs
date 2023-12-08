@@ -1,15 +1,15 @@
-﻿using System;
+﻿using Blog.Core.Contracts.Controllers.Posts;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Blog.Core.Entities;
 
 namespace Blog.Infrastructure.Services.Interfaces;
 
 public interface IPostService
 {
-    IEnumerable<Post> GetPosts();
-    Task<Post?> GetPostById(Guid id);
-    Task<Post> CreatePost(Post createPost);
-    Task<Post?> UpdatePost(Post updatePost);
-    Task<Post?> DeletePost(Guid id);
+    Task<IEnumerable<PostResponse>> GetPosts();
+    Task<PostResponse?> GetPostById(Guid id);
+    Task<PostResponse?> CreatePost(CreatePostRequest createPost);
+    Task<PostResponse?> UpdatePost(UpdatePostRequest updatePost);
+    Task<PostResponse?> DeletePost(Guid id);
 }

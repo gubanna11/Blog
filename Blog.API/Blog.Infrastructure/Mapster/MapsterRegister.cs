@@ -10,6 +10,10 @@ public sealed class MapsterRegister : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
+        config.ForType<Category, CategoryResponse>();
+        config.ForType<Comment, CommentResponse>();
+        config.ForType<Post, PostResponse>();
+
         config.ForType<CreateCategoryRequest, Category>();
         config.ForType<UpdateCategoryRequest, Category>();
 

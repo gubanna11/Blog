@@ -12,7 +12,7 @@ public sealed class Post
     [StringLength(maximumLength: 500)]
     public string Title { get; set; } = string.Empty;
 
-    [StringLength(120000, MinimumLength = 50)]
+    [StringLength(120000, MinimumLength = 10)]
     public string Content { get; set; } = string.Empty;
 
     [ForeignKey(nameof(UserId))]
