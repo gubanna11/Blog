@@ -4,16 +4,16 @@ using System;
 namespace Blog.Core.Contracts.Controllers.Posts;
 
 public sealed record PostResponse
-(
-    Guid PostId,
-    string Title,
-    string Content,
-
-    string UserId,
-    User? User,
-
-    DateTime PublishDate,
-    bool IsActive,
-    Guid CategoryId,
-    Category? Category
-);
+{
+    public required Guid PostId { get; init; }
+    public required string Title { get; init; }
+    public required string Content { get; init; }
+    
+    public required string UserId { get; init; }
+    public required User? User { get; init; }
+    
+    public required DateTime PublishDate { get; init; }
+    public required bool IsActive { get; init; }
+    public required Guid CategoryId { get; init; }
+    public required Category? Category { get; init; }
+}

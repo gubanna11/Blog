@@ -13,13 +13,13 @@ public sealed class PostsControllerTests
 {
     private readonly PostsController _controller;
     private readonly Mock<IMediator> _mediator;
-    private readonly Faker<Post> _postFaker;
+    private readonly Faker<PostResponse> _postFaker;
 
     public PostsControllerTests()
     {
         _mediator = new Mock<IMediator>();
         _controller = new PostsController(_mediator.Object);
-        _postFaker = new Faker<Post>()
+        _postFaker = new Faker<PostResponse>()
             .RuleFor(p => p.PostId, f => f.Random.Guid())
             .RuleFor(p => p.Title, f => f.Lorem.Sentence(5))
             .RuleFor(p => p.Content, f => f.Lorem.Paragraph(5))
@@ -36,19 +36,18 @@ public sealed class PostsControllerTests
     {
         //Arrange
         var post = _postFaker.Generate();
-        CreatePostRequest createPost = new(post.Title, post.Content, post.UserId, post.PublishDate, post.IsActive,
-            post.CategoryId);
+        CreatePostRequest createPost = new(post.Title, post.Content, post.UserId, post.IsActive, post.CategoryId);
 
         _mediator.Setup(m => m.Send(It.IsAny<CreatePostCommand>(), default))
             .ReturnsAsync(post);
 
         //Act
         var response = (_controller.CreatePost(createPost, CancellationToken.None).Result as OkObjectResult)!;
-        var result = (response.Value as Post)!;
+        var result = (response.Value as PostResponse)!;
 
         //Assert
         response.Should().BeOfType<OkObjectResult>();
-        result.Should().BeOfType<Post>();
+        result.Should().BeOfType<PostResponse>();
         result.Should().BeEquivalentTo(post, opts =>
             opts.Excluding(c => c.PostId)
         );
@@ -69,11 +68,11 @@ public sealed class PostsControllerTests
 
         //Act
         var response = (_controller.GetPosts(CancellationToken.None).Result as OkObjectResult)!;
-        var result = response.Value as List<Post>;
+        var result = response.Value as List<PostResponse>;
 
         //Assert
         response.Should().BeOfType<OkObjectResult>();
-        result.Should().BeOfType<List<Post>>();
+        result.Should().BeOfType<List<PostResponse>>();
         result.Should().NotBeNullOrEmpty();
         result.Should().BeEquivalentTo(posts);
     }
@@ -110,11 +109,11 @@ public sealed class PostsControllerTests
         //Act
         var response =
             (_controller.GetPostById(post.PostId, CancellationToken.None).Result as OkObjectResult)!;
-        var result = response.Value as Post;
+        var result = response.Value as PostResponse;
 
         //Assert
         response.Should().BeOfType<OkObjectResult>();
-        result.Should().BeOfType<Post>();
+        result.Should().BeOfType<PostResponse>();
         result.Should().BeEquivalentTo(post);
     }
 
@@ -123,7 +122,7 @@ public sealed class PostsControllerTests
     {
         //Arrange
         _mediator.Setup(m => m.Send(It.IsAny<GetPostByIdQuery>(), default))
-            .ReturnsAsync((Post)null!);
+            .ReturnsAsync((PostResponse)null!);
 
         //Act
         var response = _controller.GetPostById(Guid.NewGuid(), CancellationToken.None).Result as NotFoundResult;
@@ -149,11 +148,11 @@ public sealed class PostsControllerTests
 
         //Act
         var response = (_controller.UpdatePost(updatePost, CancellationToken.None).Result as OkObjectResult)!;
-        var result = response.Value as Post;
+        var result = response.Value as PostResponse;
 
         //Assert
         response.Should().BeOfType<OkObjectResult>();
-        result.Should().BeOfType<Post>();
+        result.Should().BeOfType<PostResponse>();
         result.Should().BeEquivalentTo(post);
     }
 
@@ -166,7 +165,7 @@ public sealed class PostsControllerTests
             post.IsActive, post.CategoryId);
 
         _mediator.Setup(m => m.Send(It.IsAny<UpdatePostCommand>(), default))
-            .ReturnsAsync((Post)null!);
+            .ReturnsAsync((PostResponse)null!);
 
         //Act
         var response = _controller.UpdatePost(updatePost, CancellationToken.None).Result as NotFoundResult;
@@ -191,11 +190,11 @@ public sealed class PostsControllerTests
         //Act
         var response =
             (_controller.DeletePost(post.PostId, CancellationToken.None).Result as OkObjectResult)!;
-        var result = response.Value as Post;
+        var result = response.Value as PostResponse;
 
         //Assert
         response.Should().BeOfType<OkObjectResult>();
-        result.Should().BeOfType<Post>();
+        result.Should().BeOfType<PostResponse>();
     }
 
     [Fact]
@@ -203,7 +202,7 @@ public sealed class PostsControllerTests
     {
         //Arrange
         _mediator.Setup(m => m.Send(It.IsAny<DeletePostCommand>(), default))
-            .ReturnsAsync((Post)null!);
+            .ReturnsAsync((PostResponse)null!);
 
         //Act
         var response = _controller.DeletePost(Guid.NewGuid(), CancellationToken.None).Result as NotFoundResult;

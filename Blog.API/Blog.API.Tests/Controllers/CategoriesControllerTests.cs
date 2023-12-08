@@ -11,7 +11,7 @@ namespace Blog.API.Tests.Controllers;
 
 public sealed class CategoriesControllerTests
 {
-    private readonly Faker<Category> _categoryFaker;
+    private readonly Faker<CategoryResponse> _categoryFaker;
     private readonly CategoriesController _controller;
     private readonly Mock<IMediator> _mediator;
 
@@ -19,7 +19,7 @@ public sealed class CategoriesControllerTests
     {
         _mediator = new Mock<IMediator>();
         _controller = new CategoriesController(_mediator.Object);
-        _categoryFaker = new Faker<Category>()
+        _categoryFaker = new Faker<CategoryResponse>()
             .RuleFor(c => c.CategoryId, f => f.Random.Guid())
             .RuleFor(c => c.Name, f => f.Name.JobArea());
     }
@@ -38,11 +38,11 @@ public sealed class CategoriesControllerTests
 
         //Act
         var response = (_controller.CreateCategory(createCategory, CancellationToken.None).Result as OkObjectResult)!;
-        var result = response.Value as Category;
+        var result = response.Value as CategoryResponse;
 
         //Assert
         response.Should().BeOfType<OkObjectResult>();
-        result.Should().BeOfType<Category>();
+        result.Should().BeOfType<CategoryResponse>();
         result.Should().BeEquivalentTo(category, opts =>
             opts.Excluding(c => c.CategoryId)
         );
@@ -63,11 +63,11 @@ public sealed class CategoriesControllerTests
 
         //Act
         var response = (_controller.GetCategories(CancellationToken.None).Result as OkObjectResult)!;
-        var result = response.Value as List<Category>;
+        var result = response.Value as List<CategoryResponse>;
 
         //Assert
         response.Should().BeOfType<OkObjectResult>();
-        result.Should().BeOfType<List<Category>>();
+        result.Should().BeOfType<List<CategoryResponse>>();
         result.Should().NotBeNullOrEmpty();
         result.Should().BeEquivalentTo(categories);
     }
@@ -104,11 +104,11 @@ public sealed class CategoriesControllerTests
         //Act
         var response =
             (_controller.GetCategoryById(category.CategoryId, CancellationToken.None).Result as OkObjectResult)!;
-        var result = response.Value as Category;
+        var result = response.Value as CategoryResponse;
 
         //Assert
         response.Should().BeOfType<OkObjectResult>();
-        result.Should().BeOfType<Category>();
+        result.Should().BeOfType<CategoryResponse>();
         result.Should().BeEquivalentTo(category);
     }
 
@@ -117,7 +117,7 @@ public sealed class CategoriesControllerTests
     {
         //Arrange
         _mediator.Setup(m => m.Send(It.IsAny<GetCategoryByIdQuery>(), default))
-            .ReturnsAsync((Category)null!);
+            .ReturnsAsync((CategoryResponse)null!);
 
         //Act
         var response = _controller.GetCategoryById(Guid.NewGuid(), CancellationToken.None).Result as NotFoundResult;
@@ -142,11 +142,11 @@ public sealed class CategoriesControllerTests
 
         //Act
         var response = (_controller.UpdateCategory(updateCategory, CancellationToken.None).Result as OkObjectResult)!;
-        var result = response.Value as Category;
+        var result = response.Value as CategoryResponse;
 
         //Assert
         response.Should().BeOfType<OkObjectResult>();
-        result.Should().BeOfType<Category>();
+        result.Should().BeOfType<CategoryResponse>();
         result.Should().BeEquivalentTo(category);
     }
 
@@ -158,7 +158,7 @@ public sealed class CategoriesControllerTests
         UpdateCategoryRequest updateCategory = new(category.CategoryId, category.Name);
 
         _mediator.Setup(m => m.Send(It.IsAny<UpdateCategoryCommand>(), default))
-            .ReturnsAsync((Category)null!);
+            .ReturnsAsync((CategoryResponse)null!);
 
         //Act
         var response = _controller.UpdateCategory(updateCategory, CancellationToken.None).Result as NotFoundResult;
@@ -183,11 +183,11 @@ public sealed class CategoriesControllerTests
         //Act
         var response =
             (_controller.DeleteCategory(category.CategoryId, CancellationToken.None).Result as OkObjectResult)!;
-        var result = response.Value as Category;
+        var result = response.Value as CategoryResponse;
 
         //Assert
         response.Should().BeOfType<OkObjectResult>();
-        result.Should().BeOfType<Category>();
+        result.Should().BeOfType<CategoryResponse>();
     }
 
     [Fact]
@@ -195,7 +195,7 @@ public sealed class CategoriesControllerTests
     {
         //Arrange
         _mediator.Setup(m => m.Send(It.IsAny<DeleteCategoryCommand>(), default))
-            .ReturnsAsync((Category)null!);
+            .ReturnsAsync((CategoryResponse)null!);
 
         //Act
         var response = _controller.DeleteCategory(Guid.NewGuid(), CancellationToken.None).Result as NotFoundResult;

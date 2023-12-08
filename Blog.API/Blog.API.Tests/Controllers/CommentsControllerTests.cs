@@ -11,7 +11,7 @@ namespace Blog.API.Tests.Controllers;
 
 public sealed class CommentsControllerTests
 {
-    private readonly Faker<Comment> _commentFaker;
+    private readonly Faker<CommentResponse> _commentFaker;
     private readonly CommentsController _controller;
     private readonly Mock<IMediator> _mediator;
 
@@ -19,7 +19,7 @@ public sealed class CommentsControllerTests
     {
         _mediator = new Mock<IMediator>();
         _controller = new CommentsController(_mediator.Object);
-        _commentFaker = new Faker<Comment>()
+        _commentFaker = new Faker<CommentResponse>()
             .RuleFor(c => c.CommentId, f => f.Random.Guid())
             .RuleFor(c => c.Content, f => f.Lorem.Paragraph())
             .RuleFor(c => c.PostId, f => f.Random.Guid())
@@ -35,19 +35,18 @@ public sealed class CommentsControllerTests
     {
         //Arrange
         var comment = _commentFaker.Generate();
-        CreateCommentRequest createComment = new(comment.Content, comment.PostId, comment.UserId, comment.PublishDate,
-            comment.ParentCommentId);
+        CreateCommentRequest createComment = new(comment.Content, comment.PostId, comment.UserId, comment.ParentCommentId);
 
         _mediator.Setup(m => m.Send(It.IsAny<CreateCommentCommand>(), default))
             .ReturnsAsync(comment);
 
         //Act
         var response = (_controller.CreateComment(createComment, CancellationToken.None).Result as OkObjectResult)!;
-        var result = response.Value as Comment;
+        var result = response.Value as CommentResponse;
 
         //Assert
         response.Should().BeOfType<OkObjectResult>();
-        result.Should().BeOfType<Comment>();
+        result.Should().BeOfType<CommentResponse>();
         result.Should().BeEquivalentTo(comment, opts =>
             opts.Excluding(c => c.CommentId)
         );
@@ -68,11 +67,11 @@ public sealed class CommentsControllerTests
 
         //Act
         var response = (_controller.GetComments(CancellationToken.None).Result as OkObjectResult)!;
-        var result = response.Value as List<Comment>;
+        var result = response.Value as List<CommentResponse>;
 
         //Assert
         response.Should().BeOfType<OkObjectResult>();
-        result.Should().BeOfType<List<Comment>>();
+        result.Should().BeOfType<List<CommentResponse>>();
         result.Should().NotBeNullOrEmpty();
         result.Should().BeEquivalentTo(comments);
     }
@@ -109,11 +108,11 @@ public sealed class CommentsControllerTests
         //Act
         var response =
             (_controller.GetCommentById(comment.CommentId, CancellationToken.None).Result as OkObjectResult)!;
-        var result = response.Value as Comment;
+        var result = response.Value as CommentResponse;
 
         //Assert
         response.Should().BeOfType<OkObjectResult>();
-        result.Should().BeOfType<Comment>();
+        result.Should().BeOfType<CommentResponse>();
         result.Should().BeEquivalentTo(comment);
     }
 
@@ -122,7 +121,7 @@ public sealed class CommentsControllerTests
     {
         //Arrange
         _mediator.Setup(m => m.Send(It.IsAny<GetCommentByIdQuery>(), default))
-            .ReturnsAsync((Comment)null!);
+            .ReturnsAsync((CommentResponse)null!);
 
         //Act
         var response = _controller.GetCommentById(Guid.NewGuid(), CancellationToken.None).Result as NotFoundResult;
@@ -148,11 +147,11 @@ public sealed class CommentsControllerTests
 
         //Act
         var response = (_controller.UpdateComment(updateComment, CancellationToken.None).Result as OkObjectResult)!;
-        var result = response.Value as Comment;
+        var result = response.Value as CommentResponse;
 
         //Assert
         response.Should().BeOfType<OkObjectResult>();
-        result.Should().BeOfType<Comment>();
+        result.Should().BeOfType<CommentResponse>();
         result.Should().BeEquivalentTo(comment);
     }
 
@@ -165,7 +164,7 @@ public sealed class CommentsControllerTests
             comment.PublishDate, comment.ParentCommentId);
 
         _mediator.Setup(m => m.Send(It.IsAny<UpdateCommentCommand>(), default))
-            .ReturnsAsync((Comment)null!);
+            .ReturnsAsync((CommentResponse)null!);
 
         //Act
         var response = _controller.UpdateComment(updateComment, CancellationToken.None).Result as NotFoundResult;
@@ -190,11 +189,11 @@ public sealed class CommentsControllerTests
         //Act
         var response =
             (_controller.DeleteComment(comment.CommentId, CancellationToken.None).Result as OkObjectResult)!;
-        var result = response.Value as Comment;
+        var result = response.Value as CommentResponse;
 
         //Assert
         response.Should().BeOfType<OkObjectResult>();
-        result.Should().BeOfType<Comment>();
+        result.Should().BeOfType<CommentResponse>();
     }
 
     [Fact]
@@ -202,7 +201,7 @@ public sealed class CommentsControllerTests
     {
         //Arrange
         _mediator.Setup(m => m.Send(It.IsAny<DeleteCommentCommand>(), default))
-            .ReturnsAsync((Comment)null!);
+            .ReturnsAsync((CommentResponse)null!);
 
         //Act
         var response = _controller.DeleteComment(Guid.NewGuid(), CancellationToken.None).Result as NotFoundResult;
