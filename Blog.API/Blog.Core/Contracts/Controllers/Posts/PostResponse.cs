@@ -3,7 +3,7 @@ using System;
 
 namespace Blog.Core.Contracts.Controllers.Posts;
 
-public sealed record PostResponse
+public sealed class PostResponse
 {
     public required Guid PostId { get; init; }
     public required string Title { get; init; }
