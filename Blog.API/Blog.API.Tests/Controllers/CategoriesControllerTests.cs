@@ -5,6 +5,7 @@ using Blog.Core.MediatR.Queries.Categories;
 using Bogus;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using NSubstitute.ReturnsExtensions;
 
 namespace Blog.API.Tests.Controllers;
 
@@ -115,7 +116,7 @@ public sealed class CategoriesControllerTests
     {
         //Arrange
         _mediator.Send(Arg.Any<GetCategoryByIdQuery>())
-            .ReturnsForAnyArgs((CategoryResponse)null!);
+            .ReturnsNullForAnyArgs();
 
         //Act
         var response = await _controller.GetCategoryById(Guid.NewGuid(), CancellationToken.None) as NotFoundResult;
@@ -156,7 +157,7 @@ public sealed class CategoriesControllerTests
         UpdateCategoryRequest updateCategory = new(category.CategoryId, category.Name);
 
         _mediator.Send(Arg.Any<UpdateCategoryCommand>())
-            .ReturnsForAnyArgs((CategoryResponse)null!);
+            .ReturnsNullForAnyArgs();
 
         //Act
         var response = await _controller.UpdateCategory(updateCategory, CancellationToken.None) as NotFoundResult;
@@ -193,7 +194,7 @@ public sealed class CategoriesControllerTests
     {
         //Arrange
         _mediator.Send(Arg.Any<DeleteCategoryCommand>())
-            .ReturnsForAnyArgs((CategoryResponse)null!);
+            .ReturnsNullForAnyArgs();
 
         //Act
         var response = await _controller.DeleteCategory(Guid.NewGuid(), CancellationToken.None) as NotFoundResult;

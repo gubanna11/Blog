@@ -5,6 +5,7 @@ using Blog.Core.MediatR.Queries.Comments;
 using Bogus;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using NSubstitute.ReturnsExtensions;
 
 namespace Blog.API.Tests.Controllers;
 
@@ -120,7 +121,7 @@ public sealed class CommentsControllerTests
     {
         //Arrange
         _mediator.Send(Arg.Any<GetCommentByIdQuery>())
-            .ReturnsForAnyArgs((CommentResponse)null!);
+            .ReturnsNullForAnyArgs();
 
         //Act
         var response = await _controller.GetCommentById(Guid.NewGuid(), CancellationToken.None) as NotFoundResult;
@@ -163,7 +164,7 @@ public sealed class CommentsControllerTests
             comment.PublishDate, comment.ParentCommentId);
 
         _mediator.Send(Arg.Any<UpdateCommentCommand>())
-            .ReturnsForAnyArgs((CommentResponse)null!);
+            .ReturnsNullForAnyArgs();
 
         //Act
         var response = await _controller.UpdateComment(updateComment, CancellationToken.None) as NotFoundResult;
@@ -200,7 +201,7 @@ public sealed class CommentsControllerTests
     {
         //Arrange
         _mediator.Send(Arg.Any<DeleteCommentCommand>())
-            .ReturnsForAnyArgs((CommentResponse)null!);
+            .ReturnsNullForAnyArgs();
 
         //Act
         var response = await _controller.DeleteComment(Guid.NewGuid(), CancellationToken.None) as NotFoundResult;

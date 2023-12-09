@@ -5,6 +5,7 @@ using Blog.Core.MediatR.Queries.Posts;
 using Bogus;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using NSubstitute.ReturnsExtensions;
 
 namespace Blog.API.Tests.Controllers;
 
@@ -120,7 +121,7 @@ public sealed class PostsControllerTests
     {
         //Arrange
         _mediator.Send(Arg.Any<GetPostByIdQuery>())
-            .ReturnsForAnyArgs((PostResponse)null!);
+            .ReturnsNullForAnyArgs();
 
         //Act
         var response = await _controller.GetPostById(Guid.NewGuid(), CancellationToken.None) as NotFoundResult;
@@ -163,7 +164,7 @@ public sealed class PostsControllerTests
             post.IsActive, post.CategoryId);
 
         _mediator.Send(Arg.Any<UpdatePostCommand>())
-            .ReturnsForAnyArgs((PostResponse)null!);
+            .ReturnsNullForAnyArgs();
 
         //Act
         var response = await _controller.UpdatePost(updatePost, CancellationToken.None) as NotFoundResult;
@@ -200,7 +201,7 @@ public sealed class PostsControllerTests
     {
         //Arrange
         _mediator.Send(Arg.Any<DeletePostCommand>())
-            .ReturnsForAnyArgs((PostResponse)null!);
+            .ReturnsNullForAnyArgs();
 
         //Act
         var response = await _controller.DeletePost(Guid.NewGuid(), CancellationToken.None) as NotFoundResult;
