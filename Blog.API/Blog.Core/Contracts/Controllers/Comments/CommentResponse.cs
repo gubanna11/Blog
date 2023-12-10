@@ -3,15 +3,15 @@ using System;
 
 namespace Blog.Core.Contracts.Controllers.Comments;
 
-public sealed record CommentResponse
-(
-    Guid CommentId,
-    string Content,
-    Guid PostId,
-
-    string UserId,
-    User? User,
-
-    DateTime PublishDate,
-    Guid? ParentCommentId
-);
+public sealed class CommentResponse
+{
+    public required Guid CommentId { get; init; }
+    public required string Content { get; init; }
+    public required Guid PostId { get; init; }
+    
+    public required string UserId { get; init; }
+    public required User? User { get; init; }
+    
+    public required DateTime PublishDate { get; init; }
+    public required Guid? ParentCommentId { get; init; }
+}

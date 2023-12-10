@@ -1,25 +1,25 @@
 ﻿using Blog.API.Controllers;
 using Blog.Core.Contracts.Controllers.Categories;
-using Blog.Core.Entities;
 using Blog.Core.MediatR.Commands.Categories;
 using Blog.Core.MediatR.Queries.Categories;
 using Bogus;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using NSubstitute.ReturnsExtensions;
 
 namespace Blog.API.Tests.Controllers;
 
 public sealed class CategoriesControllerTests
 {
-    private readonly Faker<Category> _categoryFaker;
+    private readonly Faker<CategoryResponse> _categoryFaker;
     private readonly CategoriesController _controller;
-    private readonly Mock<IMediator> _mediator;
+    private readonly IMediator _mediator;
 
     public CategoriesControllerTests()
     {
-        _mediator = new Mock<IMediator>();
-        _controller = new CategoriesController(_mediator.Object);
-        _categoryFaker = new Faker<Category>()
+        _mediator = Substitute.For<IMediator>();
+        _controller = new CategoriesController(_mediator);
+        _categoryFaker = new Faker<CategoryResponse>()
             .RuleFor(c => c.CategoryId, f => f.Random.Guid())
             .RuleFor(c => c.Name, f => f.Name.JobArea());
     }
@@ -27,22 +27,22 @@ public sealed class CategoriesControllerTests
     #region CreateCategory
 
     [Fact]
-    public void CreateCategory_WhenCalled_ReturnOk()
+    public async void CreateCategory_WhenCalled_ReturnOk()
     {
         //Arrange
         var category = _categoryFaker.Generate();
         CreateCategoryRequest createCategory = new(category.Name);
 
-        _mediator.Setup(m => m.Send(It.IsAny<CreateCategoryCommand>(), default))
-            .ReturnsAsync(category);
+        _mediator.Send(Arg.Any<CreateCategoryCommand>())
+            .ReturnsForAnyArgs(category);
 
         //Act
-        var response = (_controller.CreateCategory(createCategory, CancellationToken.None).Result as OkObjectResult)!;
-        var result = response.Value as Category;
+        var response = (await _controller.CreateCategory(createCategory, CancellationToken.None) as OkObjectResult)!;
+        var result = response.Value as CategoryResponse;
 
         //Assert
         response.Should().BeOfType<OkObjectResult>();
-        result.Should().BeOfType<Category>();
+        result.Should().BeOfType<CategoryResponse>();
         result.Should().BeEquivalentTo(category, opts =>
             opts.Excluding(c => c.CategoryId)
         );
@@ -53,36 +53,36 @@ public sealed class CategoriesControllerTests
     #region GetCategories
 
     [Fact]
-    public void GetCategories_WhenCalled_ReturnOk()
+    public async void GetCategories_WhenCalled_ReturnOk()
     {
         //Arrange
         var categories = _categoryFaker.Generate(10);
 
-        _mediator.Setup(m => m.Send(It.IsAny<GetCategoriesQuery>(), default))
-            .ReturnsAsync(categories);
+        _mediator.Send(Arg.Any<GetCategoriesQuery>())
+            .ReturnsForAnyArgs(categories);
 
         //Act
-        var response = (_controller.GetCategories(CancellationToken.None).Result as OkObjectResult)!;
-        var result = response.Value as List<Category>;
+        var response = (await _controller.GetCategories(CancellationToken.None) as OkObjectResult)!;
+        var result = response.Value as List<CategoryResponse>;
 
         //Assert
         response.Should().BeOfType<OkObjectResult>();
-        result.Should().BeOfType<List<Category>>();
+        result.Should().BeOfType<List<CategoryResponse>>();
         result.Should().NotBeNullOrEmpty();
         result.Should().BeEquivalentTo(categories);
     }
 
     [Fact]
-    public void GetCategories_WhenCalled_ReturnNotFound()
+    public async void GetCategories_WhenCalled_ReturnNotFound()
     {
         //Arrange
         var categories = _categoryFaker.Generate(0);
 
-        _mediator.Setup(m => m.Send(It.IsAny<GetCategoriesQuery>(), default))
-            .ReturnsAsync(categories);
+        _mediator.Send(Arg.Any<GetCategoriesQuery>())
+            .ReturnsForAnyArgs(categories);
 
         //Act
-        var response = _controller.GetCategories(CancellationToken.None).Result as NotFoundResult;
+        var response = await _controller.GetCategories(CancellationToken.None) as NotFoundResult;
 
         //Assert
         response.Should().BeOfType<NotFoundResult>();
@@ -93,34 +93,33 @@ public sealed class CategoriesControllerTests
     #region GetCategory
 
     [Fact]
-    public void GetCategory_WhenCalled_ReturnOk()
+    public async void GetCategory_WhenCalled_ReturnOk()
     {
         //Arrange
         var category = _categoryFaker.Generate();
 
-        _mediator.Setup(m => m.Send(It.IsAny<GetCategoryByIdQuery>(), default))
-            .ReturnsAsync(category);
+        _mediator.Send(Arg.Any<GetCategoryByIdQuery>())
+            .ReturnsForAnyArgs(category);
 
         //Act
-        var response =
-            (_controller.GetCategoryById(category.CategoryId, CancellationToken.None).Result as OkObjectResult)!;
-        var result = response.Value as Category;
+        var response = (await _controller.GetCategoryById(category.CategoryId, CancellationToken.None) as OkObjectResult)!;
+        var result = response.Value as CategoryResponse;
 
         //Assert
         response.Should().BeOfType<OkObjectResult>();
-        result.Should().BeOfType<Category>();
+        result.Should().BeOfType<CategoryResponse>();
         result.Should().BeEquivalentTo(category);
     }
 
     [Fact]
-    public void GetCategory_WhenCalled_ReturnNotFound()
+    public async void GetCategory_WhenCalled_ReturnNotFound()
     {
         //Arrange
-        _mediator.Setup(m => m.Send(It.IsAny<GetCategoryByIdQuery>(), default))
-            .ReturnsAsync((Category)null!);
+        _mediator.Send(Arg.Any<GetCategoryByIdQuery>())
+            .ReturnsNullForAnyArgs();
 
         //Act
-        var response = _controller.GetCategoryById(Guid.NewGuid(), CancellationToken.None).Result as NotFoundResult;
+        var response = await _controller.GetCategoryById(Guid.NewGuid(), CancellationToken.None) as NotFoundResult;
 
         //Assert
         response.Should().BeOfType<NotFoundResult>();
@@ -131,37 +130,37 @@ public sealed class CategoriesControllerTests
     #region UpdateCategory
 
     [Fact]
-    public void UpdateCategory_WhenCalled_ReturnOk()
+    public async void UpdateCategory_WhenCalled_ReturnOk()
     {
         //Arrange
         var category = _categoryFaker.Generate();
         UpdateCategoryRequest updateCategory = new(category.CategoryId, category.Name);
 
-        _mediator.Setup(m => m.Send(It.IsAny<UpdateCategoryCommand>(), default))
-            .ReturnsAsync(category);
+        _mediator.Send(Arg.Any<UpdateCategoryCommand>())
+            .ReturnsForAnyArgs(category);
 
         //Act
-        var response = (_controller.UpdateCategory(updateCategory, CancellationToken.None).Result as OkObjectResult)!;
-        var result = response.Value as Category;
+        var response = (await _controller.UpdateCategory(updateCategory, CancellationToken.None) as OkObjectResult)!;
+        var result = response.Value as CategoryResponse;
 
         //Assert
         response.Should().BeOfType<OkObjectResult>();
-        result.Should().BeOfType<Category>();
+        result.Should().BeOfType<CategoryResponse>();
         result.Should().BeEquivalentTo(category);
     }
 
     [Fact]
-    public void UpdateCategory_WhenCalled_ReturnNotFound()
+    public async void UpdateCategory_WhenCalled_ReturnNotFound()
     {
         //Arrange
         var category = _categoryFaker.Generate();
         UpdateCategoryRequest updateCategory = new(category.CategoryId, category.Name);
 
-        _mediator.Setup(m => m.Send(It.IsAny<UpdateCategoryCommand>(), default))
-            .ReturnsAsync((Category)null!);
+        _mediator.Send(Arg.Any<UpdateCategoryCommand>())
+            .ReturnsNullForAnyArgs();
 
         //Act
-        var response = _controller.UpdateCategory(updateCategory, CancellationToken.None).Result as NotFoundResult;
+        var response = await _controller.UpdateCategory(updateCategory, CancellationToken.None) as NotFoundResult;
 
         //Assert
         response.Should().BeOfType<NotFoundResult>();
@@ -172,33 +171,33 @@ public sealed class CategoriesControllerTests
     #region DeleteCategory
 
     [Fact]
-    public void DeleteCategory_WhenCalled_ReturnOk()
+    public async void DeleteCategory_WhenCalled_ReturnOk()
     {
         //Arrange
         var category = _categoryFaker.Generate();
 
-        _mediator.Setup(m => m.Send(It.IsAny<DeleteCategoryCommand>(), default))
-            .ReturnsAsync(category);
+        _mediator.Send(Arg.Any<DeleteCategoryCommand>())
+            .ReturnsForAnyArgs(category);
 
         //Act
         var response =
-            (_controller.DeleteCategory(category.CategoryId, CancellationToken.None).Result as OkObjectResult)!;
-        var result = response.Value as Category;
+            (await _controller.DeleteCategory(category.CategoryId, CancellationToken.None) as OkObjectResult)!;
+        var result = response.Value as CategoryResponse;
 
         //Assert
         response.Should().BeOfType<OkObjectResult>();
-        result.Should().BeOfType<Category>();
+        result.Should().BeOfType<CategoryResponse>();
     }
 
     [Fact]
-    public void DeleteCategory_WhenCalled_ReturnNotFound()
+    public async void DeleteCategory_WhenCalled_ReturnNotFound()
     {
         //Arrange
-        _mediator.Setup(m => m.Send(It.IsAny<DeleteCategoryCommand>(), default))
-            .ReturnsAsync((Category)null!);
+        _mediator.Send(Arg.Any<DeleteCategoryCommand>())
+            .ReturnsNullForAnyArgs();
 
         //Act
-        var response = _controller.DeleteCategory(Guid.NewGuid(), CancellationToken.None).Result as NotFoundResult;
+        var response = await _controller.DeleteCategory(Guid.NewGuid(), CancellationToken.None) as NotFoundResult;
 
         //Assert
         response.Should().BeOfType<NotFoundResult>();
