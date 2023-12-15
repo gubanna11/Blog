@@ -1,9 +1,11 @@
 ﻿using System.Net;
+using System.Text.Json;
 using Blog.Core.Contracts.Controllers.Posts;
 using Blog.Core.Entities;
 using Blog.Infrastructure.Data;
 using Bogus;
 using Meziantou.Xunit;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,6 +18,12 @@ public sealed class PostsControllerTests
     private readonly HttpClient _client;
     private readonly WebApplicationFactory<Program> _factory;
     private readonly Faker<Post> _postFaker;
+    private readonly User _mockUser;
+    private readonly Category _mockCategory;
+    private readonly JsonSerializerOptions _jsonSerializerOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
 
     public PostsControllerTests()
     {
@@ -39,14 +47,19 @@ public sealed class PostsControllerTests
                 });
             });
         _client = _factory.CreateClient();
+        _mockUser = MockUser();
+        _mockCategory = MockCategory();
         _postFaker = new Faker<Post>()
             .RuleFor(p => p.PostId, f => f.Random.Guid())
             .RuleFor(p => p.Title, f => f.Lorem.Sentence(5))
             .RuleFor(p => p.Content, f => f.Lorem.Paragraph(5))
-            .RuleFor(p => p.UserId, f => f.Random.Guid().ToString())
+            .RuleFor(p => p.UserId, _mockUser.Id)
             .RuleFor(p => p.PublishDate, f => f.Date.Past())
             .RuleFor(p => p.IsActive, f => f.Random.Bool())
-            .RuleFor(p => p.CategoryId, f => f.Random.Guid());
+            .RuleFor(p => p.CategoryId, _mockCategory.CategoryId);
+        
+        AddUserToData();
+        AddCategoryToData();
     }
 
     #region GetPosts
@@ -71,11 +84,13 @@ public sealed class PostsControllerTests
         response.EnsureSuccessStatusCode();
         var responseContent = await response.Content.ReadAsStringAsync();
 
-        var posts = SpanJson.JsonSerializer.Generic.Utf16.Deserialize<Post[]>(responseContent)!;
+        var posts = JsonSerializer.Deserialize<Post[]>(responseContent, _jsonSerializerOptions);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        posts.Should().BeEquivalentTo(expectedPosts);
+        posts.Should().BeEquivalentTo(expectedPosts, options => options
+            .Using<Post>(ctx => ctx.Subject.User.Should().BeEquivalentTo(_mockUser))
+            .WhenTypeIs<Post>());
     }
 
     #endregion
@@ -101,11 +116,13 @@ public sealed class PostsControllerTests
         response.EnsureSuccessStatusCode();
         var responseContent = await response.Content.ReadAsStringAsync();
 
-        var result = SpanJson.JsonSerializer.Generic.Utf16.Deserialize<Post>(responseContent)!;
+        var result = JsonSerializer.Deserialize<Post>(responseContent, _jsonSerializerOptions);
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        result.Should().BeEquivalentTo(post);
+        result.Should().BeEquivalentTo(post, options => options
+            .Using<Post>(ctx => ctx.Subject.User.Should().BeEquivalentTo(_mockUser))
+            .WhenTypeIs<Post>());
     }
 
     [Fact]
@@ -159,12 +176,12 @@ public sealed class PostsControllerTests
 
         var responseContent = await getResponse.Content.ReadAsStringAsync();
 
-        var categories = SpanJson.JsonSerializer.Generic.Utf16.Deserialize<Post[]>(responseContent)!;
+        var posts = JsonSerializer.Deserialize<Post[]>(responseContent, _jsonSerializerOptions);
 
         // Assert
         postResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        categories.Should().Contain(p => p.PostId == createdPost.PostId);
+        posts.Should().Contain(p => p.PostId == createdPost.PostId);
     }
 
     #endregion
@@ -214,7 +231,7 @@ public sealed class PostsControllerTests
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<ApiDataContext>();
             await dbContext.Database.EnsureCreatedAsync();
-            dbContext.Categories.RemoveRange(dbContext.Categories);
+            dbContext.Posts.RemoveRange(dbContext.Posts);
             await dbContext.SaveChangesAsync();
         }
 
@@ -283,4 +300,56 @@ public sealed class PostsControllerTests
     }
 
     #endregion
+    
+    private static User MockUser()
+    {
+        PasswordHasher<User> hasher = new();
+        const string mockUser = "Mock";
+        const string mockPassword = "Secret123$";
+        const string mockEmail = "mock@example.com";
+        
+        User user = new()
+        {
+            Id = Guid.NewGuid().ToString(),
+            UserName = mockUser,
+            NormalizedUserName = mockUser.ToUpper(),
+            Email = mockEmail,
+            NormalizedEmail = mockEmail.ToUpper(),
+            PhoneNumber = "1234567890",
+            PhoneNumberConfirmed = false,
+            EmailConfirmed = true,
+            SecurityStamp = Guid.NewGuid().ToString(),
+            ConcurrencyStamp = Guid.NewGuid().ToString(),
+        };
+        user.PasswordHash = hasher.HashPassword(user, mockPassword);
+
+        return user;
+    }
+    
+    private static Category MockCategory()
+    {
+        var categoryFaker = new Faker<Category>()
+            .RuleFor(c => c.CategoryId, f => f.Random.Guid())
+            .RuleFor(c => c.Name, f => f.Name.JobArea())
+            .RuleFor(c => c.Posts, Enumerable.Empty<Post>());
+
+        return categoryFaker.Generate();
+    }
+    
+    private async void AddUserToData()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+
+        await userManager.CreateAsync(_mockUser);
+    }
+    
+    private async void AddCategoryToData()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApiDataContext>();
+        await dbContext.Database.EnsureCreatedAsync();
+        await dbContext.Categories.AddAsync(_mockCategory);
+        await dbContext.SaveChangesAsync();
+    }
 }

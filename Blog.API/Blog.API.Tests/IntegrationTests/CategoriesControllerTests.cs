@@ -138,10 +138,6 @@ public sealed class CategoriesControllerTests
         {
             Name = category.Name,
         };
-        /*var createCategoryRequest = new CreateCategoryRequest()
-        {
-            Name = "Test category"
-        };*/
         var content = new StringContent(SpanJson.JsonSerializer.Generic.Utf16.Serialize(createCategoryRequest),
             System.Text.Encoding.UTF8,
             "application/json");

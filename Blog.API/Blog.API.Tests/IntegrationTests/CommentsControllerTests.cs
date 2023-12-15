@@ -1,10 +1,12 @@
 ﻿using System.Net;
+using System.Text.Json;
 using Blog.Core.Contracts.Controllers.Categories;
 using Blog.Core.Contracts.Controllers.Comments;
 using Blog.Core.Entities;
 using Blog.Infrastructure.Data;
 using Bogus;
 using Meziantou.Xunit;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +19,11 @@ public sealed class CommentsControllerTests
     private readonly HttpClient _client;
     private readonly WebApplicationFactory<Program> _factory;
     private readonly Faker<Comment> _commentFaker;
+    private readonly User _mockUser;
+    private readonly JsonSerializerOptions _jsonSerializerOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
 
     public CommentsControllerTests()
     {
@@ -40,13 +47,16 @@ public sealed class CommentsControllerTests
                 });
             });
         _client = _factory.CreateClient();
+        _mockUser = MockUser();
         _commentFaker = new Faker<Comment>()
             .RuleFor(c => c.CommentId, f => f.Random.Guid())
             .RuleFor(c => c.Content, f => f.Lorem.Paragraph())
             .RuleFor(c => c.PostId, f => f.Random.Guid())
-            .RuleFor(c => c.UserId, f => f.Random.Guid().ToString())
             .RuleFor(c => c.PublishDate, f => f.Date.Past())
-            .RuleFor(c => c.ParentCommentId, f => f.Random.Guid());
+            .RuleFor(c => c.ParentCommentId, f => f.Random.Guid())
+            .RuleFor(c => c.UserId, _mockUser.Id);
+
+        AddUserToData();
     }
 
     #region GetComments
@@ -60,6 +70,7 @@ public sealed class CommentsControllerTests
         using (var scope = _factory.Services.CreateScope())
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<ApiDataContext>();
+            
             await dbContext.Database.EnsureCreatedAsync();
             dbContext.Comments.RemoveRange(dbContext.Comments);
             await dbContext.Comments.AddRangeAsync(expectedComments);
@@ -71,11 +82,13 @@ public sealed class CommentsControllerTests
         response.EnsureSuccessStatusCode();
         var responseContent = await response.Content.ReadAsStringAsync();
 
-        var categories = SpanJson.JsonSerializer.Generic.Utf16.Deserialize<Comment[]>(responseContent)!;
+        var comments = JsonSerializer.Deserialize<Comment[]>(responseContent, _jsonSerializerOptions);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        categories.Should().BeEquivalentTo(expectedComments);
+        comments.Should().BeEquivalentTo(expectedComments, options => options
+            .Using<Comment>(ctx => ctx.Subject.User.Should().BeEquivalentTo(_mockUser))
+            .WhenTypeIs<Comment>());
     }
 
     #endregion
@@ -91,6 +104,7 @@ public sealed class CommentsControllerTests
         using (var scope = _factory.Services.CreateScope())
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<ApiDataContext>();
+            
             await dbContext.Database.EnsureCreatedAsync();
             await dbContext.Comments.AddAsync(comment);
             await dbContext.SaveChangesAsync();
@@ -101,11 +115,13 @@ public sealed class CommentsControllerTests
         response.EnsureSuccessStatusCode();
         var responseContent = await response.Content.ReadAsStringAsync();
 
-        var result = SpanJson.JsonSerializer.Generic.Utf16.Deserialize<Comment>(responseContent)!;
+        var result = JsonSerializer.Deserialize<Comment>(responseContent, _jsonSerializerOptions);
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        result.Should().BeEquivalentTo(comment);
+        result.Should().BeEquivalentTo(comment, options => options
+            .Using<Comment>(ctx => ctx.Subject.User.Should().BeEquivalentTo(_mockUser))
+            .WhenTypeIs<Comment>());
     }
 
     [Fact]
@@ -136,6 +152,7 @@ public sealed class CommentsControllerTests
     {
         // Arrange
         var comment = _commentFaker.Generate();
+
         CreateCommentRequest createCommentRequest = new()
         {
             Content = comment.Content,
@@ -143,6 +160,7 @@ public sealed class CommentsControllerTests
             PostId = comment.PostId,
             UserId = comment.UserId,
         };
+        
         var content = new StringContent(SpanJson.JsonSerializer.Generic.Utf16.Serialize(createCommentRequest),
             System.Text.Encoding.UTF8,
             "application/json");
@@ -153,7 +171,7 @@ public sealed class CommentsControllerTests
         var createdComment =
             SpanJson.JsonSerializer.Generic.Utf16.Deserialize<Comment>(await postResponse.Content.ReadAsStringAsync());
 
-        var getResponse = await _client.GetAsync("/api/categories");
+        var getResponse = await _client.GetAsync("/api/comments");
         getResponse.EnsureSuccessStatusCode();
 
         var responseContent = await getResponse.Content.ReadAsStringAsync();
@@ -175,9 +193,11 @@ public sealed class CommentsControllerTests
     {
         //Arrange
         var comment = _commentFaker.Generate();
+        
         using (var scope = _factory.Services.CreateScope())
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<ApiDataContext>();
+            
             await dbContext.Database.EnsureCreatedAsync();
             dbContext.Comments.Add(comment);
             await dbContext.SaveChangesAsync();
@@ -242,9 +262,11 @@ public sealed class CommentsControllerTests
     {
         //Arrange
         var comment = _commentFaker.Generate();
+        
         using (var scope = _factory.Services.CreateScope())
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<ApiDataContext>();
+            
             await dbContext.Database.EnsureCreatedAsync();
             dbContext.Comments.Add(comment);
             await dbContext.SaveChangesAsync();
@@ -277,4 +299,37 @@ public sealed class CommentsControllerTests
     }
 
     #endregion
+
+    private static User MockUser()
+    {
+        PasswordHasher<User> hasher = new();
+        const string mockUser = "Mock";
+        const string mockPassword = "Secret123$";
+        const string mockEmail = "mock@example.com";
+        
+        User user = new()
+        {
+            Id = Guid.NewGuid().ToString(),
+            UserName = mockUser,
+            NormalizedUserName = mockUser.ToUpper(),
+            Email = mockEmail,
+            NormalizedEmail = mockEmail.ToUpper(),
+            PhoneNumber = "1234567890",
+            PhoneNumberConfirmed = false,
+            EmailConfirmed = true,
+            SecurityStamp = Guid.NewGuid().ToString(),
+            ConcurrencyStamp = Guid.NewGuid().ToString(),
+        };
+        user.PasswordHash = hasher.HashPassword(user, mockPassword);
+
+        return user;
+    }
+
+    private void AddUserToData()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+
+        userManager.CreateAsync(_mockUser).Wait();
+    }
 }
