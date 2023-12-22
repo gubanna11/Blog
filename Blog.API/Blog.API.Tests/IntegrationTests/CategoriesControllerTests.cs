@@ -45,39 +45,6 @@ public sealed class CategoriesControllerTests
             .RuleFor(c => c.Posts, Enumerable.Empty<Post>());
     }
 
-    #region GetCategories
-
-    [Fact]
-    public async Task GetCategories_WithCategories_ReturnsOkResultWithCategories()
-    {
-        // Arrange
-        var expectedCategories = _categoryFaker.Generate(10);
-
-        using (var scope = _factory.Services.CreateScope())
-        {
-            var dbContext = scope.ServiceProvider.GetRequiredService<ApiDataContext>();
-            await dbContext.Database.EnsureCreatedAsync();
-            dbContext.Categories.RemoveRange(dbContext.Categories);
-            await dbContext.Categories.AddRangeAsync(expectedCategories);
-            await dbContext.SaveChangesAsync();
-        }
-
-
-        // Act
-        var response = await _client.GetAsync("/api/categories");
-        response.EnsureSuccessStatusCode();
-        var responseContent = await response.Content.ReadAsStringAsync();
-
-        var categories = SpanJson.JsonSerializer.Generic.Utf16.Deserialize<Category[]>(responseContent)!;
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        categories.Should().BeEquivalentTo(expectedCategories);
-    }
-
-    #endregion
-
-
     #region GetCategory
 
     [Fact]
@@ -89,6 +56,7 @@ public sealed class CategoriesControllerTests
         using (var scope = _factory.Services.CreateScope())
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<ApiDataContext>();
+
             await dbContext.Database.EnsureCreatedAsync();
             await dbContext.Categories.AddAsync(category);
             await dbContext.SaveChangesAsync();
@@ -113,15 +81,66 @@ public sealed class CategoriesControllerTests
         using (var scope = _factory.Services.CreateScope())
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<ApiDataContext>();
+
             await dbContext.Database.EnsureCreatedAsync();
-            dbContext.Categories.RemoveRange(dbContext.Categories);
-            await dbContext.SaveChangesAsync();
         }
 
         //Act
         var response = await _client.GetAsync($"/api/categories/{Guid.Empty}");
 
         //Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    #endregion
+
+    #region GetCategories
+
+    [Fact]
+    public async Task GetCategories_WithCategories_ReturnsOkResultWithCategories()
+    {
+        // Arrange
+        var expectedCategories = _categoryFaker.Generate(10);
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApiDataContext>();
+
+            await dbContext.Database.EnsureCreatedAsync();
+            dbContext.Categories.RemoveRange(dbContext.Categories);
+            await dbContext.Categories.AddRangeAsync(expectedCategories);
+            await dbContext.SaveChangesAsync();
+        }
+
+        // Act
+        var response = await _client.GetAsync("/api/categories");
+        response.EnsureSuccessStatusCode();
+        var responseContent = await response.Content.ReadAsStringAsync();
+
+        var categories = SpanJson.JsonSerializer.Generic.Utf16.Deserialize<Category[]>(responseContent)!;
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        categories.Should().BeEquivalentTo(expectedCategories);
+    }
+
+    [Fact]
+    public async Task GetCategories_WithNoCategories_ReturnsNotFound()
+    {
+        // Arrange
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApiDataContext>();
+
+            await dbContext.Database.EnsureCreatedAsync();
+            dbContext.Categories.RemoveRange(dbContext.Categories);
+            await dbContext.SaveChangesAsync();
+        }
+
+        // Act
+        var response = await _client.GetAsync("/api/categories");
+
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
@@ -148,17 +167,17 @@ public sealed class CategoriesControllerTests
         var createdCategory =
             SpanJson.JsonSerializer.Generic.Utf16.Deserialize<Category>(await postResponse.Content.ReadAsStringAsync());
 
-        var getResponse = await _client.GetAsync("/api/categories");
+        var getResponse = await _client.GetAsync($"/api/categories/{createdCategory.CategoryId}");
         getResponse.EnsureSuccessStatusCode();
 
         var responseContent = await getResponse.Content.ReadAsStringAsync();
 
-        var categories = SpanJson.JsonSerializer.Generic.Utf16.Deserialize<Category[]>(responseContent)!;
+        var result = SpanJson.JsonSerializer.Generic.Utf16.Deserialize<Category>(responseContent)!;
 
         // Assert
         postResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        categories.Should().Contain(c => c.CategoryId == createdCategory.CategoryId);
+        result.Should().BeOfType<Category>();
     }
 
     #endregion
@@ -169,14 +188,13 @@ public sealed class CategoriesControllerTests
     public async Task UpdateCategory_WhenCategory_ReturnOk()
     {
         //Arrange
-        Category category = new()
-        {
-            CategoryId = Guid.NewGuid(),
-            Name = "Test"
-        };
+        var category = _categoryFaker.Generate();
+        var newCategory = _categoryFaker.Generate();
+
         using (var scope = _factory.Services.CreateScope())
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<ApiDataContext>();
+
             await dbContext.Database.EnsureCreatedAsync();
             dbContext.Categories.Add(category);
             await dbContext.SaveChangesAsync();
@@ -185,8 +203,9 @@ public sealed class CategoriesControllerTests
         var updateCategoryRequest = new UpdateCategoryRequest()
         {
             CategoryId = category.CategoryId,
-            Name = "NewName",
+            Name = newCategory.Name,
         };
+
         var content = new StringContent(SpanJson.JsonSerializer.Generic.Utf16.Serialize(updateCategoryRequest),
             System.Text.Encoding.UTF8,
             "application/json");
@@ -194,9 +213,21 @@ public sealed class CategoriesControllerTests
 
         //Act
         var putResponse = await _client.PutAsync("/api/categories", content);
+        putResponse.EnsureSuccessStatusCode();
+
+        var getResponse = await _client.GetAsync($"/api/categories/{category.CategoryId}");
+        getResponse.EnsureSuccessStatusCode();
+
+        var responseContent = await getResponse.Content.ReadAsStringAsync();
+
+        var result = SpanJson.JsonSerializer.Generic.Utf16.Deserialize<Category>(responseContent)!;
 
         //Assert
         putResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        result.Should().BeEquivalentTo(newCategory, opts =>
+            opts.Excluding(c => c.CategoryId)
+        );
     }
 
     [Fact]
@@ -206,9 +237,8 @@ public sealed class CategoriesControllerTests
         using (var scope = _factory.Services.CreateScope())
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<ApiDataContext>();
+
             await dbContext.Database.EnsureCreatedAsync();
-            dbContext.Categories.RemoveRange(dbContext.Categories);
-            await dbContext.SaveChangesAsync();
         }
 
         var updateCategoryRequest = new UpdateCategoryRequest()
@@ -216,6 +246,7 @@ public sealed class CategoriesControllerTests
             CategoryId = Guid.NewGuid(),
             Name = "NewName"
         };
+
         var content = new StringContent(SpanJson.JsonSerializer.Generic.Utf16.Serialize(updateCategoryRequest),
             System.Text.Encoding.UTF8,
             "application/json");
@@ -236,14 +267,12 @@ public sealed class CategoriesControllerTests
     public async Task DeleteCategory_WhenCategory_ReturnOk()
     {
         //Arrange
-        Category category = new()
-        {
-            CategoryId = Guid.NewGuid(),
-            Name = "Test"
-        };
+        var category = _categoryFaker.Generate();
+
         using (var scope = _factory.Services.CreateScope())
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<ApiDataContext>();
+
             await dbContext.Database.EnsureCreatedAsync();
             dbContext.Categories.Add(category);
             await dbContext.SaveChangesAsync();
@@ -251,9 +280,13 @@ public sealed class CategoriesControllerTests
 
         //Act
         var deleteResponse = await _client.DeleteAsync($"/api/categories/{category.CategoryId}");
+        deleteResponse.EnsureSuccessStatusCode();
+
+        var getResponse = await _client.GetAsync($"/api/categories/{category.CategoryId}");
 
         //Assert
         deleteResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        getResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     [Fact]
@@ -263,9 +296,8 @@ public sealed class CategoriesControllerTests
         using (var scope = _factory.Services.CreateScope())
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<ApiDataContext>();
+
             await dbContext.Database.EnsureCreatedAsync();
-            dbContext.Categories.RemoveRange(dbContext.Categories);
-            await dbContext.SaveChangesAsync();
         }
 
         //Act
