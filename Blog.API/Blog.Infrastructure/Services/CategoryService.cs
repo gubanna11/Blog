@@ -9,7 +9,9 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using Blog.Core.MediatR.Queries.Categories;
 
 namespace Blog.Infrastructure.Services;
 
@@ -41,6 +43,34 @@ public sealed class CategoryService : ICategoryService
                 }
             }
         }
+
+        return _mapper.Map<IEnumerable<CategoryResponse>>(categories);
+    }
+
+    public async Task<IEnumerable<CategoryResponse>> GetPagedCategories(GetPagedCategoriesQuery request, CancellationToken cancellationToken)
+    {
+        var categoriesQuery = _unitOfWork.GenericRepository.Set;
+
+        if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+        {
+            categoriesQuery = categoriesQuery.Where(c => c.Name.Contains(request.SearchTerm));
+        }
+
+        var categories = await categoriesQuery
+            .Include(c => c.Posts)
+            .ToListAsync(cancellationToken);
+
+        foreach (var category in categories)
+        {
+            if (category.Posts is not null)
+            {
+                foreach (Post post in category.Posts)
+                {
+                    post.Category = null;
+                }
+            }
+        }
+
         return _mapper.Map<IEnumerable<CategoryResponse>>(categories);
     }
 
@@ -60,6 +90,7 @@ public sealed class CategoryService : ICategoryService
                     post.Category = null;
                 }
             }
+
             return _mapper.Map<CategoryResponse>(category);
         }
 

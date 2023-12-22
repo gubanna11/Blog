@@ -34,6 +34,18 @@ public sealed class CategoriesController : ControllerBase
 
         return NotFound();
     }
+    
+    [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<CategoryResponse>))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(NotFoundResult))]
+    public async Task<IActionResult> GetPagedCategories(string? searchTerm, CancellationToken cancellationToken)
+    {
+        var categories = await _mediator.Send(new GetPagedCategoriesQuery(searchTerm), cancellationToken);
+
+        if (categories.Any()) return Ok(categories);
+
+        return NotFound();
+    }
 
     [HttpGet("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CategoryResponse))]
