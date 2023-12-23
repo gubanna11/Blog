@@ -34,6 +34,20 @@ public sealed class CommentsController : ControllerBase
 
         return NotFound();
     }
+    
+    [HttpGet("getPaged")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<CommentResponse>))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(NotFoundResult))]
+    public async Task<IActionResult> GetPagedComments(string? searchTerm, string? sortColumn, string? sortOrder,
+        int page, int pageSize,
+        CancellationToken cancellationToken)
+    {
+        var comments = await _mediator.Send(new GetPagedCommentsQuery(searchTerm, sortColumn, sortOrder, page, pageSize), cancellationToken);
+
+        if (comments.Items.Any()) return Ok(comments);
+
+        return NotFound();
+    }
 
     [HttpGet("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CommentResponse))]

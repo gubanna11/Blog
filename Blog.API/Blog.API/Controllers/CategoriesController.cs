@@ -34,17 +34,32 @@ public sealed class CategoriesController : ControllerBase
 
         return NotFound();
     }
-    
-    [HttpGet]
+
+    [HttpGet("getPaged")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<CategoryResponse>))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(NotFoundResult))]
-    public async Task<IActionResult> GetPagedCategories(string? searchTerm, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetPagedCategories(string? searchTerm, string? sortColumn, string? sortOrder,
+        int page, int pageSize,
+        CancellationToken cancellationToken)
     {
-        var categories = await _mediator.Send(new GetPagedCategoriesQuery(searchTerm), cancellationToken);
+        var categories = await _mediator.Send(new GetPagedCategoriesQuery(searchTerm, sortColumn, sortOrder, page, pageSize),
+            cancellationToken);
 
-        if (categories.Any()) return Ok(categories);
+        if (categories.Items.Any()) return Ok(categories);
 
         return NotFound();
+    }
+    
+    [HttpGet("getCursorPaged")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<CategoryResponse>))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(NotFoundResult))]
+    public async Task<IActionResult> GetCursorPagedCategories(string? searchTerm, string? sortColumn, string? sortOrder, int pageSize, 
+        CancellationToken cancellationToken, Guid cursor = default)
+    {
+        var categories = await _mediator.Send(new GetCursorPagedCategoriesQuery(cursor, pageSize, searchTerm, sortColumn, sortOrder),
+            cancellationToken);
+
+        return Ok(categories);
     }
 
     [HttpGet("{id:guid}")]

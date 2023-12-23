@@ -2,14 +2,17 @@
 using Blog.Core.Entities;
 using Blog.Infrastructure.Abstract.Interfaces;
 using Blog.Infrastructure.Services.Interfaces;
-using FluentValidation;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
+using Blog.Core.Contracts.Controllers;
+using Blog.Core.MediatR.Queries.Categories;
+using Blog.Core.MediatR.Queries.Comments;
 
 namespace Blog.Infrastructure.Services;
 
@@ -40,6 +43,46 @@ public sealed class CommentService : ICommentService
         }
 
         return _mapper.Map<IEnumerable<CommentResponse>>(comments);
+    }
+
+    public async Task<PagedResponse<Comment>> GetPagedComments(GetPagedCommentsQuery request, CancellationToken cancellationToken)
+    {
+        var commentsQuery = _unitOfWork.GenericRepository.Set;
+
+        if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+        {
+            commentsQuery = commentsQuery.Where(c => c.Content.Contains(request.SearchTerm));
+        }
+
+        Expression<Func<Comment, object>> keySelector = request.SortColumn?.ToLower() switch
+        {
+            "content" => comment => comment.Content,
+            _ => comment => comment.CommentId,
+        };
+
+        if (request.SortOrder?.ToLower() == "desc")
+        {
+            commentsQuery = commentsQuery.OrderByDescending(keySelector);
+        }
+        else
+        {
+            commentsQuery = commentsQuery.OrderBy(keySelector);
+        }
+
+        var commentsResponseQuery = commentsQuery
+            .Include(c => c.User);
+
+        var comments = await PagedResponse<Comment>.CreateAsync(commentsResponseQuery, request.Page, request.PageSize, cancellationToken);
+
+        foreach (var comment in comments.Items)
+        {
+            if (comment.User is not null)
+            {
+                comment.User.Comments = null;
+            }
+        }
+
+        return comments;
     }
 
     public async Task<CommentResponse?> GetCommentById(Guid id)
