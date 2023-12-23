@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Blog.Core.Contracts.Controllers;
 
 namespace Blog.API.Controllers;
 
@@ -36,7 +37,7 @@ public sealed class CategoriesController : ControllerBase
     }
 
     [HttpGet("getPaged")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<CategoryResponse>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedResponse<CategoryResponse>))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(NotFoundResult))]
     public async Task<IActionResult> GetPagedCategories(string? searchTerm, string? sortColumn, string? sortOrder,
         int page, int pageSize,
@@ -44,14 +45,14 @@ public sealed class CategoriesController : ControllerBase
     {
         var categories = await _mediator.Send(new GetPagedCategoriesQuery(searchTerm, sortColumn, sortOrder, page, pageSize),
             cancellationToken);
-
+        
         if (categories.Items.Any()) return Ok(categories);
 
         return NotFound();
     }
     
     [HttpGet("getCursorPaged")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<CategoryResponse>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CursorPagedResponse<CategoryResponse>))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(NotFoundResult))]
     public async Task<IActionResult> GetCursorPagedCategories(string? searchTerm, string? sortColumn, string? sortOrder, int pageSize, 
         CancellationToken cancellationToken, Guid cursor = default)

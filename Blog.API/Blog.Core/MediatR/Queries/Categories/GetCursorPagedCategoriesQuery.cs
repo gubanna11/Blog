@@ -1,6 +1,6 @@
 ﻿using System;
 using Blog.Core.Contracts.Controllers;
-using Blog.Core.Entities;
+using Blog.Core.Contracts.Controllers.Categories;
 using MediatR;
 
 namespace Blog.Core.MediatR.Queries.Categories;
@@ -10,4 +10,4 @@ public sealed record GetCursorPagedCategoriesQuery(
     int PageSize,
     string? SearchTerm,
     string? SortColumn,
-    string? SortOrder) : IRequest<CursorPagedResponse<Category>>;
+    string? SortOrder) : IRequest<CursorPagedResponse<CategoryResponse>>;
