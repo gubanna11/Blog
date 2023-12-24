@@ -13,10 +13,16 @@ public sealed record PagedResponse<TEntity>(IEnumerable<TEntity> Items, int Page
     public bool IsPreviousPage => Page > 1;
 
     public static async Task<PagedResponse<TEntity>> CreateAsync(IQueryable<TEntity> query, int page, int pageSize,
+        Func<List<TEntity>, List<TEntity>>? additionalFunction = null,
         CancellationToken cancellationToken = default)
     {
         int totalCount = await query.CountAsync(cancellationToken);
         var items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
+        
+        if (additionalFunction is not null)
+        {
+            items = additionalFunction(items);
+        }
 
         return new(items, page, pageSize, totalCount);
     }
@@ -24,7 +30,7 @@ public sealed record PagedResponse<TEntity>(IEnumerable<TEntity> Items, int Page
     public static async Task<PagedResponse<TEntity>> CreateAsync<TSource>(IQueryable<TSource> query, int page,
         int pageSize,
         Func<IEnumerable<TSource>, IEnumerable<TEntity>> mapFunction,
-        Func<List<TSource>, List<TSource>>? additionalFunction,
+        Func<List<TSource>, List<TSource>>? additionalFunction = null,
         CancellationToken cancellationToken = default)
     {
         int totalCount = await query.CountAsync(cancellationToken);

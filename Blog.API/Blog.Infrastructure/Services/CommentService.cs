@@ -72,7 +72,7 @@ public sealed class CommentService : ICommentService
         var commentsResponseQuery = commentsQuery
             .Include(c => c.User);
 
-        var comments = await PagedResponse<Comment>.CreateAsync(commentsResponseQuery, request.Page, request.PageSize, cancellationToken);
+        var comments = await PagedResponse<Comment>.CreateAsync(commentsResponseQuery, request.Page, request.PageSize, null, cancellationToken);
 
         foreach (var comment in comments.Items)
         {

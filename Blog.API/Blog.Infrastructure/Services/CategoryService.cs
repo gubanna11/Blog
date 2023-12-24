@@ -103,7 +103,6 @@ public sealed class CategoryService : ICategoryService
 
 
         var categories = await CursorPagedResponse<CategoryResponse>.CreateAsync(categoriesQuery,
-            request.Cursor,
             request.PageSize, c => c.CategoryId > request.Cursor, item => item?.CategoryId,
             MapCategoriesToCategoryResponses, NullCategoriesForPosts, cancellationToken);
 
