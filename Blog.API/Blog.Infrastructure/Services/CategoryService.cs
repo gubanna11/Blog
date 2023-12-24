@@ -33,7 +33,7 @@ public sealed class CategoryService : ICategoryService
             .Include(c => c.Posts)
             .ToListAsync();
 
-        NullCategories(categories);
+        NullCategoriesForPosts(categories);
 
         return _mapper.Map<IEnumerable<CategoryResponse>>(categories);
     }
@@ -67,33 +67,23 @@ public sealed class CategoryService : ICategoryService
             .Include(c => c.Posts);
 
         var categories = await PagedResponse<CategoryResponse>.CreateAsync(categoriesQuery, request.Page,
-            request.PageSize, MapFunction, NullCategories, cancellationToken);
+            request.PageSize, MapCategoriesToCategoryResponses, NullCategoriesForPosts, cancellationToken);
 
         return categories;
-
-        IEnumerable<CategoryResponse> MapFunction(IEnumerable<Category> mappedCategories) =>
-            _mapper.Map<IEnumerable<CategoryResponse>>(mappedCategories);
     }
 
     public async Task<CursorPagedResponse<CategoryResponse>> GetCursorPagedCategories(
         GetCursorPagedCategoriesQuery request,
         CancellationToken cancellationToken)
     {
-        var categoriesQuery = _unitOfWork.GenericRepository.Set
-            .Include(c => c.Posts)
-            .Select(c => new CategoryResponse
-            {
-                CategoryId = c.CategoryId,
-                Name = c.Name,
-                Posts = c.Posts
-            });
+        var categoriesQuery = _unitOfWork.GenericRepository.Set;
 
         if (!string.IsNullOrWhiteSpace(request.SearchTerm))
         {
             categoriesQuery = categoriesQuery.Where(c => c.Name.Contains(request.SearchTerm));
         }
 
-        Expression<Func<CategoryResponse, object>> keySelector = request.SortColumn?.ToLower() switch
+        Expression<Func<Category, object>> keySelector = request.SortColumn?.ToLower() switch
         {
             "name" => category => category.Name,
             _ => category => category.CategoryId,
@@ -108,19 +98,14 @@ public sealed class CategoryService : ICategoryService
             categoriesQuery = categoriesQuery.OrderBy(keySelector);
         }
 
-        var categories = await CursorPagedResponse<CategoryResponse>.CreateAsync(categoriesQuery, request.Cursor,
-            request.PageSize, c => c.CategoryId > request.Cursor, item => item?.CategoryId, cancellationToken);
+        categoriesQuery = categoriesQuery
+            .Include(c => c.Posts);
 
-        foreach (var category in categories.Items)
-        {
-            if (category.Posts is not null)
-            {
-                foreach (var post in category.Posts)
-                {
-                    post.Category = null;
-                }
-            }
-        }
+
+        var categories = await CursorPagedResponse<CategoryResponse>.CreateAsync(categoriesQuery,
+            request.Cursor,
+            request.PageSize, c => c.CategoryId > request.Cursor, item => item?.CategoryId,
+            MapCategoriesToCategoryResponses, NullCategoriesForPosts, cancellationToken);
 
         return categories;
     }
@@ -182,7 +167,12 @@ public sealed class CategoryService : ICategoryService
         return null;
     }
 
-    private static List<Category> NullCategories(List<Category> categories)
+    private IEnumerable<CategoryResponse> MapCategoriesToCategoryResponses(IEnumerable<Category> mappedCategories)
+    {
+        return _mapper.Map<IEnumerable<CategoryResponse>>(mappedCategories);
+    }
+
+    private static List<Category> NullCategoriesForPosts(List<Category> categories)
     {
         foreach (var category in categories)
         {
