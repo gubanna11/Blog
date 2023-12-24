@@ -63,8 +63,11 @@ public sealed class CategoryService : ICategoryService
             categoriesQuery = categoriesQuery.OrderBy(keySelector);
         }
 
-        categoriesQuery = categoriesQuery
-            .Include(c => c.Posts);
+        if (request.IsIncludePosts)
+        {
+            categoriesQuery = categoriesQuery
+                .Include(c => c.Posts);
+        }
 
         var categories = await PagedResponse<CategoryResponse>.CreateAsync(categoriesQuery, request.Page,
             request.PageSize, MapCategoriesToCategoryResponses, NullCategoriesForPosts, cancellationToken);
@@ -98,9 +101,11 @@ public sealed class CategoryService : ICategoryService
             categoriesQuery = categoriesQuery.OrderBy(keySelector);
         }
 
-        categoriesQuery = categoriesQuery
-            .Include(c => c.Posts);
-
+        if (request.IsIncludePosts)
+        {
+            categoriesQuery = categoriesQuery
+                .Include(c => c.Posts);
+        }
 
         var categories = await CursorPagedResponse<CategoryResponse>.CreateAsync(categoriesQuery,
             request.PageSize, c => c.CategoryId > request.Cursor, item => item?.CategoryId,

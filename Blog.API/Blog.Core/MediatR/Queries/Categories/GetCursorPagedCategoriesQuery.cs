@@ -10,4 +10,5 @@ public sealed record GetCursorPagedCategoriesQuery(
     int PageSize,
     string? SearchTerm,
     string? SortColumn,
-    string? SortOrder) : IRequest<CursorPagedResponse<CategoryResponse>>;
+    string? SortOrder,
+    bool IsIncludePosts) : IRequest<CursorPagedResponse<CategoryResponse>>;

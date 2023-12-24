@@ -9,4 +9,5 @@ public sealed record GetPagedCategoriesQuery(
     string? SortColumn,
     string? SortOrder,
     int Page,
-    int PageSize) : IRequest<PagedResponse<CategoryResponse>>;
+    int PageSize,
+    bool IsIncludePosts) : IRequest<PagedResponse<CategoryResponse>>;
