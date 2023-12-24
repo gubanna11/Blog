@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Blog.Core.Contracts.Controllers;
+using Blog.Core.Contracts.Controllers.Pagination;
 
 namespace Blog.API.Controllers;
 
@@ -39,13 +40,13 @@ public sealed class CategoriesController : ControllerBase
     [HttpGet("getPaged")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedResponse<CategoryResponse>))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(NotFoundResult))]
-    public async Task<IActionResult> GetPagedCategories(string? searchTerm, string? sortColumn, string? sortOrder,
-        int page, int pageSize,
+    public async Task<IActionResult> GetPagedCategories([FromQuery] GetPagedRequest getPagedRequest,
         CancellationToken cancellationToken,
         bool isIncludePosts = true)
     {
         var categories = await _mediator.Send(
-            new GetPagedCategoriesQuery(searchTerm, sortColumn, sortOrder, page, pageSize, isIncludePosts),
+            new GetPagedCategoriesQuery(getPagedRequest.SearchTerm, getPagedRequest.SortColumn,
+                getPagedRequest.SortOrder, getPagedRequest.Page, getPagedRequest.PageSize, isIncludePosts),
             cancellationToken);
 
         if (categories.Items.Any()) return Ok(categories);
@@ -56,12 +57,13 @@ public sealed class CategoriesController : ControllerBase
     [HttpGet("getCursorPaged")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CursorPagedResponse<CategoryResponse>))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(NotFoundResult))]
-    public async Task<IActionResult> GetCursorPagedCategories(string? searchTerm, string? sortColumn, string? sortOrder,
-        int pageSize,
-        CancellationToken cancellationToken, Guid cursor = default, bool isIncludePosts = true)
+    public async Task<IActionResult> GetCursorPagedCategories([FromQuery] GetCursorPagedRequest getCursorPagedRequest,
+        CancellationToken cancellationToken, bool isIncludePosts = true)
     {
         var categories = await _mediator.Send(
-            new GetCursorPagedCategoriesQuery(cursor, pageSize, searchTerm, sortColumn, sortOrder, isIncludePosts),
+            new GetCursorPagedCategoriesQuery(getCursorPagedRequest.Cursor, getCursorPagedRequest.PageSize,
+                getCursorPagedRequest.SearchTerm, getCursorPagedRequest.SortColumn, getCursorPagedRequest.SortOrder,
+                isIncludePosts),
             cancellationToken);
 
         return Ok(categories);
