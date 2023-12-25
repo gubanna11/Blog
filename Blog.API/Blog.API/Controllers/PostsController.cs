@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Blog.Core.Contracts.Controllers;
+using Blog.Core.Contracts.Controllers.Pagination;
 using Blog.Core.Contracts.Controllers.Posts;
 using Blog.Core.MediatR.Commands.Posts;
 using Blog.Core.MediatR.Queries.Posts;
@@ -33,6 +35,37 @@ public sealed class PostsController : ControllerBase
         if (posts.Any()) return Ok(posts);
 
         return NotFound();
+    }
+
+    [HttpGet("getPaged")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedResponse<PostResponse>))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(NotFoundResult))]
+    public async Task<IActionResult> GetPagedPosts([FromQuery] GetPagedRequest getPagedRequest,
+        CancellationToken cancellationToken,
+        bool isIncludePost = true, bool isIncludeUser = true)
+    {
+        var posts = await _mediator.Send(
+            new GetPagedPostsQuery(getPagedRequest.SearchTerm, getPagedRequest.SortColumn,
+                getPagedRequest.SortOrder, getPagedRequest.Page, getPagedRequest.PageSize, isIncludePost,
+                isIncludeUser),
+            cancellationToken);
+
+        return Ok(posts);
+    }
+
+    [HttpGet("getCursorPaged")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CursorPagedResponse<PostResponse>))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(NotFoundResult))]
+    public async Task<IActionResult> GetCursorPagedPosts([FromQuery] GetCursorPagedRequest getCursorPagedRequest,
+        CancellationToken cancellationToken, bool isIncludePost = true, bool isIncludeUser = true)
+    {
+        var posts = await _mediator.Send(
+            new GetCursorPagedPostsQuery(getCursorPagedRequest.Cursor, getCursorPagedRequest.PageSize,
+                getCursorPagedRequest.SearchTerm, getCursorPagedRequest.SortColumn, getCursorPagedRequest.SortOrder,
+                isIncludePost, isIncludeUser),
+            cancellationToken);
+
+        return Ok(posts);
     }
 
     [HttpGet("{id:guid}")]

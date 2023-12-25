@@ -8,5 +8,5 @@ public sealed class CategoryResponse
 {
     public required Guid CategoryId { get; init; }
     public required string Name { get; init; }
-    public required IEnumerable<Post>? Posts { get; init; }    
+    public IEnumerable<Post>? Posts { get; init; } 
 }
