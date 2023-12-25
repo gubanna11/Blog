@@ -12,7 +12,8 @@ namespace Blog.Infrastructure.Services.Interfaces;
 public interface ICommentService
 {
     Task<IEnumerable<CommentResponse>> GetComments();
-    Task<PagedResponse<Comment>> GetPagedComments(GetPagedCommentsQuery request, CancellationToken cancellationToken);
+    Task<PagedResponse<CommentResponse>> GetPagedComments(GetPagedCommentsQuery request, CancellationToken cancellationToken);
+    Task<CursorPagedResponse<CommentResponse>> GetCursorPagedComments(GetCursorPagedCommentsQuery request, CancellationToken cancellationToken);
     Task<CommentResponse?> GetCommentById(Guid id);
     Task<CommentResponse?> CreateComment(CreateCommentRequest createComment);
     Task<CommentResponse?> UpdateComment(UpdateCommentRequest updateComment);

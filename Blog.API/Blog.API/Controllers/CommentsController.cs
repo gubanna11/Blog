@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Blog.Core.Contracts.Controllers;
 using Blog.Core.Contracts.Controllers.Comments;
+using Blog.Core.Contracts.Controllers.Pagination;
 using Blog.Core.MediatR.Commands.Comments;
 using Blog.Core.MediatR.Queries.Comments;
 using MediatR;
@@ -34,19 +36,34 @@ public sealed class CommentsController : ControllerBase
 
         return NotFound();
     }
-    
+
     [HttpGet("getPaged")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<CommentResponse>))]
-    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(NotFoundResult))]
-    public async Task<IActionResult> GetPagedComments(string? searchTerm, string? sortColumn, string? sortOrder,
-        int page, int pageSize,
-        CancellationToken cancellationToken)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedResponse<CommentResponse>))]
+    public async Task<IActionResult> GetPagedComments([FromQuery] GetPagedRequest getPagedRequest,
+        CancellationToken cancellationToken,
+        bool isIncludePost = true, bool isIncludeUser = true)
     {
-        var comments = await _mediator.Send(new GetPagedCommentsQuery(searchTerm, sortColumn, sortOrder, page, pageSize), cancellationToken);
+        var comments = await _mediator.Send(
+            new GetPagedCommentsQuery(getPagedRequest.SearchTerm, getPagedRequest.SortColumn,
+                getPagedRequest.SortOrder, getPagedRequest.Page, getPagedRequest.PageSize, isIncludePost,
+                isIncludeUser),
+            cancellationToken);
 
-        if (comments.Items.Any()) return Ok(comments);
+        return Ok(comments);
+    }
 
-        return NotFound();
+    [HttpGet("getCursorPaged")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CursorPagedResponse<CommentResponse>))]
+    public async Task<IActionResult> GetCursorPagedCategories([FromQuery] GetCursorPagedRequest getCursorPagedRequest,
+        CancellationToken cancellationToken, bool isIncludePost = true, bool isIncludeUser = true)
+    {
+        var comments = await _mediator.Send(
+            new GetCursorPagedCommentsQuery(getCursorPagedRequest.Cursor, getCursorPagedRequest.PageSize,
+                getCursorPagedRequest.SearchTerm, getCursorPagedRequest.SortColumn, getCursorPagedRequest.SortOrder,
+                isIncludePost, isIncludeUser),
+            cancellationToken);
+
+        return Ok(comments);
     }
 
     [HttpGet("{id:guid}")]

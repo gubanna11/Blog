@@ -171,9 +171,9 @@ public sealed class CategoryService : ICategoryService
         return null;
     }
 
-    private IEnumerable<CategoryResponse> MapCategoriesToCategoryResponses(IEnumerable<Category> mappedCategories)
+    private IEnumerable<CategoryResponse> MapCategoriesToCategoryResponses(IEnumerable<Category> categories)
     {
-        return _mapper.Map<IEnumerable<CategoryResponse>>(mappedCategories);
+        return _mapper.Map<IEnumerable<CategoryResponse>>(categories);
     }
 
     private static List<Category> NullCategoriesForPosts(List<Category> categories)

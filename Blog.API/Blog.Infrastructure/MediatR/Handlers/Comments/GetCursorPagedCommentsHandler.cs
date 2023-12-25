@@ -8,18 +8,18 @@ using MediatR;
 
 namespace Blog.Infrastructure.MediatR.Handlers.Comments;
 
-public sealed class GetPagedCommentsHandler : IRequestHandler<GetPagedCommentsQuery, PagedResponse<CommentResponse>>
+public sealed class GetCursorPagedCommentsHandler : IRequestHandler<GetCursorPagedCommentsQuery, CursorPagedResponse<CommentResponse>>
 {
     private readonly ICommentService _commentService;
 
-    public GetPagedCommentsHandler(ICommentService commentService)
+    public GetCursorPagedCommentsHandler(ICommentService commentService)
     {
         _commentService = commentService;
     }
     
-    public async Task<PagedResponse<CommentResponse>> Handle(GetPagedCommentsQuery request, CancellationToken cancellationToken)
+    public async Task<CursorPagedResponse<CommentResponse>> Handle(GetCursorPagedCommentsQuery request, CancellationToken cancellationToken)
     {
-        var categories = await _commentService.GetPagedComments(request, cancellationToken);
+        var categories = await _commentService.GetCursorPagedComments(request, cancellationToken);
 
         return categories;
     }

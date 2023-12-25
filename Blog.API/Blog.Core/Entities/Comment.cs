@@ -14,6 +14,7 @@ public sealed class Comment
 
     [ForeignKey(nameof(PostId))]
     public Guid PostId { get; set; }
+    public Post? Post { get; set; }
 
     [ForeignKey(nameof(UserId))]
     public string UserId { get; set; } = string.Empty;

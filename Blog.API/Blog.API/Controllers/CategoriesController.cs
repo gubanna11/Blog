@@ -39,7 +39,6 @@ public sealed class CategoriesController : ControllerBase
 
     [HttpGet("getPaged")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedResponse<CategoryResponse>))]
-    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(NotFoundResult))]
     public async Task<IActionResult> GetPagedCategories([FromQuery] GetPagedRequest getPagedRequest,
         CancellationToken cancellationToken,
         bool isIncludePosts = true)
@@ -49,14 +48,11 @@ public sealed class CategoriesController : ControllerBase
                 getPagedRequest.SortOrder, getPagedRequest.Page, getPagedRequest.PageSize, isIncludePosts),
             cancellationToken);
 
-        if (categories.Items.Any()) return Ok(categories);
-
-        return NotFound();
+        return Ok(categories);
     }
 
     [HttpGet("getCursorPaged")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CursorPagedResponse<CategoryResponse>))]
-    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(NotFoundResult))]
     public async Task<IActionResult> GetCursorPagedCategories([FromQuery] GetCursorPagedRequest getCursorPagedRequest,
         CancellationToken cancellationToken, bool isIncludePosts = true)
     {
