@@ -1,3 +1,9 @@
-﻿namespace Blog.Core.Contracts.Controllers.Categories;
+﻿using System.Runtime.Serialization;
 
-public sealed record CreateCategoryRequest(string Name);
+namespace Blog.Core.Contracts.Controllers.Categories;
+
+public sealed class CreateCategoryRequest
+{
+    [DataMember(Name = "name")]
+    public required string Name { get; init; }
+}

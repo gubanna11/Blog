@@ -36,7 +36,14 @@ public sealed class PostsControllerTests
     {
         //Arrange
         var post = _postFaker.Generate();
-        CreatePostRequest createPost = new(post.Title, post.Content, post.UserId, post.IsActive, post.CategoryId);
+        CreatePostRequest createPost = new()
+        {
+            CategoryId = post.CategoryId,
+            Content = post.Content,
+            IsActive = post.IsActive,
+            Title = post.Title,
+            UserId = post.UserId,
+        };
 
         _mediator.Send(Arg.Any<CreatePostCommand>())
             .ReturnsForAnyArgs(post);
@@ -139,8 +146,16 @@ public sealed class PostsControllerTests
     {
         //Arrange
         var post = _postFaker.Generate();
-        UpdatePostRequest updatePost = new(post.PostId, post.Title, post.Content, post.UserId, post.PublishDate,
-            post.IsActive, post.CategoryId);
+        UpdatePostRequest updatePost = new()
+        {
+            CategoryId = post.CategoryId,
+            Content = post.Content,
+            IsActive = post.IsActive,
+            PostId = post.PostId,
+            PublishDate = post.PublishDate,
+            Title = post.Title,
+            UserId = post.UserId,
+        };
 
         _mediator.Send(Arg.Any<UpdatePostCommand>())
             .ReturnsForAnyArgs(post);
@@ -160,8 +175,16 @@ public sealed class PostsControllerTests
     {
         //Arrange
         var post = _postFaker.Generate();
-        UpdatePostRequest updatePost = new(post.PostId, post.Title, post.Content, post.UserId, post.PublishDate,
-            post.IsActive, post.CategoryId);
+        UpdatePostRequest updatePost = new()
+        {
+            CategoryId = post.CategoryId,
+            Content = post.Content,
+            IsActive = post.IsActive,
+            PostId = post.PostId,
+            PublishDate = post.PublishDate,
+            Title = post.Title,
+            UserId = post.UserId,
+        };
 
         _mediator.Send(Arg.Any<UpdatePostCommand>())
             .ReturnsNullForAnyArgs();

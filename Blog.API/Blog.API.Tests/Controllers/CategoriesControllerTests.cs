@@ -31,8 +31,10 @@ public sealed class CategoriesControllerTests
     {
         //Arrange
         var category = _categoryFaker.Generate();
-        CreateCategoryRequest createCategory = new(category.Name);
-
+        CreateCategoryRequest createCategory = new()
+        {
+            Name = category.Name
+        };
         _mediator.Send(Arg.Any<CreateCategoryCommand>())
             .ReturnsForAnyArgs(category);
 
@@ -134,7 +136,11 @@ public sealed class CategoriesControllerTests
     {
         //Arrange
         var category = _categoryFaker.Generate();
-        UpdateCategoryRequest updateCategory = new(category.CategoryId, category.Name);
+        UpdateCategoryRequest updateCategory = new()
+        {
+            CategoryId = category.CategoryId,
+            Name = category.Name,
+        };
 
         _mediator.Send(Arg.Any<UpdateCategoryCommand>())
             .ReturnsForAnyArgs(category);
@@ -154,7 +160,11 @@ public sealed class CategoriesControllerTests
     {
         //Arrange
         var category = _categoryFaker.Generate();
-        UpdateCategoryRequest updateCategory = new(category.CategoryId, category.Name);
+        UpdateCategoryRequest updateCategory = new()
+        {
+            CategoryId = category.CategoryId,
+            Name = category.Name,
+        };
 
         _mediator.Send(Arg.Any<UpdateCategoryCommand>())
             .ReturnsNullForAnyArgs();

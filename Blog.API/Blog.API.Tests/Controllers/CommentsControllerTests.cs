@@ -35,7 +35,13 @@ public sealed class CommentsControllerTests
     {
         //Arrange
         var comment = _commentFaker.Generate();
-        CreateCommentRequest createComment = new(comment.Content, comment.PostId, comment.UserId, comment.ParentCommentId);
+        CreateCommentRequest createComment =new()
+        {
+            Content = comment.Content,
+            ParentCommentId = comment.ParentCommentId,
+            PostId = comment.PostId,
+            UserId = comment.UserId,
+        };
 
         _mediator.Send(Arg.Any<CreateCommentCommand>())
             .ReturnsForAnyArgs(comment);
@@ -139,8 +145,15 @@ public sealed class CommentsControllerTests
     {
         //Arrange
         var comment = _commentFaker.Generate();
-        UpdateCommentRequest updateComment = new(comment.CommentId, comment.Content, comment.PostId, comment.UserId,
-            comment.PublishDate, comment.ParentCommentId);
+        UpdateCommentRequest updateComment = new()
+        {
+            CommentId = comment.CommentId,
+            Content = comment.Content,
+            ParentCommentId = comment.ParentCommentId,
+            PostId = comment.PostId,
+            UserId = comment.UserId,
+            PublishDate = comment.PublishDate,
+        };
 
         _mediator.Send(Arg.Any<UpdateCommentCommand>())
             .ReturnsForAnyArgs(comment);
@@ -160,8 +173,15 @@ public sealed class CommentsControllerTests
     {
         //Arrange
         var comment = _commentFaker.Generate();
-        UpdateCommentRequest updateComment = new(comment.CommentId, comment.Content, comment.PostId, comment.UserId,
-            comment.PublishDate, comment.ParentCommentId);
+        UpdateCommentRequest updateComment = new()
+        {
+            CommentId = comment.CommentId,
+            Content = comment.Content,
+            ParentCommentId = comment.ParentCommentId,
+            PostId = comment.PostId,
+            UserId = comment.UserId,
+            PublishDate = comment.PublishDate,
+        };
 
         _mediator.Send(Arg.Any<UpdateCommentCommand>())
             .ReturnsNullForAnyArgs();

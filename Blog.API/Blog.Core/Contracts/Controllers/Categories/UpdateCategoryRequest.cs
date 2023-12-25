@@ -1,5 +1,12 @@
 ﻿using System;
+using System.Runtime.Serialization;
 
 namespace Blog.Core.Contracts.Controllers.Categories;
 
-public sealed record UpdateCategoryRequest(Guid CategoryId, string Name);
+public sealed class UpdateCategoryRequest
+{
+    [DataMember(Name = "categoryId")]
+    public required Guid CategoryId { get; init; }
+    [DataMember(Name = "name")]
+    public required string Name { get; init; }
+};
