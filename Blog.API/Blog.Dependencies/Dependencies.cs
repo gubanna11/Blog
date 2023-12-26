@@ -1,4 +1,5 @@
-﻿using Blog.Core.Entities;
+﻿using System.Threading.RateLimiting;
+using Blog.Core.Entities;
 using Blog.Core.Validators.Comments;
 using Blog.Infrastructure.Abstract;
 using Blog.Infrastructure.Abstract.Interfaces;
@@ -11,6 +12,8 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Mapster;
 using MapsterMapper;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -29,6 +32,7 @@ public static class Dependencies
         services.ConfigureServices();
         services.ConfigureMediatR();
         services.ConfigureValidators();
+        services.ConfigureRateLimiter();
 
         return services;
     }
@@ -76,5 +80,22 @@ public static class Dependencies
     {
         services.AddFluentValidationAutoValidation();
         services.AddValidatorsFromAssemblyContaining<CreateCommentRequestValidator>();
+    }
+    
+    private static void ConfigureRateLimiter(this IServiceCollection services)
+    {
+        services.AddRateLimiter(opts =>
+        {
+            opts.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+            opts.AddPolicy("DefaultRateLimiter",
+                context =>
+                    RateLimitPartition.GetFixedWindowLimiter(context.Connection.RemoteIpAddress?.ToString(),
+                        _ => new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = 30,
+                            Window = TimeSpan.FromSeconds(30),
+                        }));
+        });
     }
 }
