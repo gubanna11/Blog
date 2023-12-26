@@ -88,14 +88,17 @@ public static class Dependencies
         {
             opts.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
-            opts.AddPolicy("DefaultRateLimiter",
-                context =>
-                    RateLimitPartition.GetFixedWindowLimiter(context.Connection.RemoteIpAddress?.ToString(),
-                        _ => new FixedWindowRateLimiterOptions
-                        {
-                            PermitLimit = 30,
-                            Window = TimeSpan.FromSeconds(30),
-                        }));
+            opts.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+            {
+                string remoteIpAddress = context.Connection.RemoteIpAddress?.ToString()!;
+
+                return RateLimitPartition.GetFixedWindowLimiter(remoteIpAddress,
+                    _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 30,
+                        Window = TimeSpan.FromSeconds(30),
+                    });
+            });
         });
     }
 }
