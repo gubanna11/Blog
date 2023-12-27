@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;
+using Blog.Core.Logging;
 
 namespace Blog.Infrastructure.MediatR.Handlers.Comments;
 
@@ -26,11 +27,11 @@ public sealed class UpdateCommentHandler : IRequestHandler<UpdateCommentCommand,
 
         if (responseComment is null)
         {
-            _logger.LogError("Comment wasn't updated with id {FailedUpdateCommentId}", request.Comment.CommentId);
+            _logger.LogCommentWasNotUpdated(request.Comment.CommentId);
         }
         else
         {
-            _logger.LogInformation("Comment was updated with id {UpdatedCommentId}", responseComment.CommentId);
+            _logger.LogCommentWasUpdated(responseComment.CommentId);
         }
 
         return responseComment;

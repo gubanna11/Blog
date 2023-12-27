@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;
+using Blog.Core.Logging;
 
 namespace Blog.Infrastructure.MediatR.Handlers.Comments;
 
@@ -26,7 +27,7 @@ public sealed class GetCommentByIdHandler : IRequestHandler<GetCommentByIdQuery,
 
         if(comment is null)
         {
-            _logger.LogError("Comment object with id {GetByIdCommentId} doesn't exits", request.Id);
+            _logger.LogCommentWithIdDoesNotExist(request.Id);
         }
 
         return comment;

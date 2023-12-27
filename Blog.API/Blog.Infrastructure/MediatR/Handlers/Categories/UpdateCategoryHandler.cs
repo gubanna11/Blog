@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;
+using Blog.Core.Logging;
 
 namespace Blog.Infrastructure.MediatR.Handlers.Categories;
 
@@ -22,15 +23,15 @@ public sealed class UpdateCategoryHandler : IRequestHandler<UpdateCategoryComman
 
     public async Task<CategoryResponse?> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
     {
-        CategoryResponse? responseCategory = await _categoryService.UpdateCategory(request.Category);
+        var responseCategory = await _categoryService.UpdateCategory(request.Category);
 
         if (responseCategory is null)
         {
-            _logger.LogError("Category wasn't updated with id {FailedUpdateCategoryId}", request.Category.CategoryId);
+            _logger.LogCategoryWasNotUpdated(request.Category.CategoryId);
         }
         else
         {
-            _logger.LogInformation("Category was updated with id {UpdatedCategoryId}", responseCategory.CategoryId);
+            _logger.LogCategoryWasUpdated(responseCategory.CategoryId);
         }
 
         return responseCategory;
