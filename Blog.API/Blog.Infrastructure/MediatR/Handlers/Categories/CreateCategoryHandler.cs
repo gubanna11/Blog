@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;
+using Blog.Core.Logging;
 
 namespace Blog.Infrastructure.MediatR.Handlers.Categories;
 
@@ -26,11 +27,11 @@ public sealed class CreateCategoryHandler : IRequestHandler<CreateCategoryComman
 
         if(responseCategory is null)
         {
-            _logger.LogError("Category wasn't created");
+            _logger.LogCategoryWasNotCreated();
         }
         else
         {
-            _logger.LogInformation("Category was created with id {CreatedCategoryId}", responseCategory.CategoryId);
+            _logger.LogCategoryWasCreated(responseCategory.CategoryId);
         }
 
         return responseCategory;

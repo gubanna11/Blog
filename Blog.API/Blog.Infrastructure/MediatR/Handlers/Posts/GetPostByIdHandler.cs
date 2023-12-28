@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;
+using Blog.Core.Logging;
 
 namespace Blog.Infrastructure.MediatR.Handlers.Posts;
 
@@ -26,7 +27,11 @@ public sealed class GetPostByIdHandler : IRequestHandler<GetPostByIdQuery, PostR
 
         if(post is null)
         {
-            _logger.LogError("Post object with id {GetByIdPostId} doesn't exits", request.Id);
+            _logger.LogPostWithIdDoesNotExist(request.Id);
+        }
+        else
+        {
+            _logger.LogPostWithIdWasGotten(post.PostId);
         }
 
         return post;

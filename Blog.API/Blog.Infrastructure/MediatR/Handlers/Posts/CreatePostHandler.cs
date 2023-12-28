@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;
+using Blog.Core.Logging;
 
 namespace Blog.Infrastructure.MediatR.Handlers.Posts;
 
@@ -26,11 +27,11 @@ public sealed class CreatePostHandler : IRequestHandler<CreatePostCommand, PostR
 
         if(responsePost is null)
         {
-            _logger.LogError("Post wasn't created");
+            _logger.LogPostWasNotCreated();
         }
         else
         {
-            _logger.LogInformation("Post was created with id {CreatedPostId}", responsePost.PostId);
+            _logger.LogPostWasCreated(responsePost.PostId);
         }
 
         return responsePost;

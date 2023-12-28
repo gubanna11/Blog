@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Blog.Core.Contracts.Controllers.Categories;
+using Blog.Core.Logging;
 using Blog.Core.MediatR.Queries.Categories;
 using Blog.Infrastructure.Services.Interfaces;
 using MediatR;
@@ -22,11 +23,15 @@ public sealed class GetCategoryByIdHandler : IRequestHandler<GetCategoryByIdQuer
 
     public async Task<CategoryResponse?> Handle(GetCategoryByIdQuery request, CancellationToken cancellationToken)
     {
-        CategoryResponse? category = await _categoryService.GetCategoryById(request.Id);
+        var category = await _categoryService.GetCategoryById(request.Id);
 
-        if(category is null)
+        if (category is null)
         {
-            _logger.LogError("Category object with id {GetByIdCategoryId} doesn't exist", request.Id);
+            _logger.LogCategoryWithIdDoesNotExist(request.Id);
+        }
+        else
+        {
+            _logger.LogCategoryWithIdWasGotten(category.CategoryId);
         }
 
         return category;

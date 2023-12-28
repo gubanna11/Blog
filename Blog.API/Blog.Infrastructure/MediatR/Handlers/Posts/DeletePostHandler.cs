@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;
+using Blog.Core.Logging;
 
 namespace Blog.Infrastructure.MediatR.Handlers.Posts;
 
@@ -26,7 +27,11 @@ public sealed class DeletePostHandler : IRequestHandler<DeletePostCommand, PostR
 
         if (post is null)
         {
-            _logger.LogError("Post object with id {DeletePostId} doesn't exist", request.Id);
+            _logger.LogPostWasNotDeleted(request.Id);
+        }
+        else
+        {
+            _logger.LogPostWasDeleted(post.PostId);
         }
 
         return post;

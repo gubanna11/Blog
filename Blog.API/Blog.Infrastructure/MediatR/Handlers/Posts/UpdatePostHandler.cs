@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;
+using Blog.Core.Logging;
 
 namespace Blog.Infrastructure.MediatR.Handlers.Posts;
 
@@ -26,11 +27,11 @@ public sealed class UpdatePostHandler : IRequestHandler<UpdatePostCommand, PostR
 
         if (responsePost is null)
         {
-            _logger.LogError("Post wasn't updated with id {FailedUpdatePostId}", request.Post.PostId);
+            _logger.LogPostWasNotUpdated(request.Post.PostId);
         }
         else
         {
-            _logger.LogInformation("Post was updated with id {UpdatedPostId}", responsePost.PostId);
+            _logger.LogPostWasUpdated(responsePost.PostId);
         }
 
         return responsePost;
