@@ -29,6 +29,10 @@ public sealed class GetPostByIdHandler : IRequestHandler<GetPostByIdQuery, PostR
         {
             _logger.LogPostWithIdDoesNotExist(request.Id);
         }
+        else
+        {
+            _logger.LogPostWithIdWasGotten(post.PostId);
+        }
 
         return post;
     }

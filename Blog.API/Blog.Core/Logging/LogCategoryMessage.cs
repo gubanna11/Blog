@@ -5,9 +5,15 @@ namespace Blog.Core.Logging;
 
 public static partial class LogCategoryMessage
 {
+    [LoggerMessage(EventId = LogEvents.CategoryWasGottenId, EventName = LogEvents.CategoryWasGottenName,
+        Level = LogLevel.Information,
+        Message = "Category object with id {GetByIdCategoryId} was gotten",
+        SkipEnabledCheck = true)]
+    public static partial void LogCategoryWithIdWasGotten(this ILogger logger, Guid getByIdCategoryId);
+    
     [LoggerMessage(EventId = LogEvents.CategoryWasNotGottenId, EventName = LogEvents.CategoryWasNotGottenName,
         Level = LogLevel.Error,
-        Message = "Category object with id {GetByIdCategoryId} doesn't exist",
+        Message = "Category object with id {GetByIdCategoryId} does not exist",
         SkipEnabledCheck = true)]
     public static partial void LogCategoryWithIdDoesNotExist(this ILogger logger, Guid getByIdCategoryId);
 
@@ -19,13 +25,13 @@ public static partial class LogCategoryMessage
 
     [LoggerMessage(EventId = LogEvents.CategoryWasNotCreatedId, EventName = LogEvents.CategoryWasNotCreatedName,
         Level = LogLevel.Error,
-        Message = "Category wasn't created",
+        Message = "Category was not created",
         SkipEnabledCheck = true)]
     public static partial void LogCategoryWasNotCreated(this ILogger logger);
 
     [LoggerMessage(EventId = LogEvents.CategoryWasNotDeletedId, EventName = LogEvents.CategoryWasNotDeletedName,
         Level = LogLevel.Error,
-        Message = "Category object with id {DeleteCategoryId} doesn't exist",
+        Message = "Category object with id {DeleteCategoryId} does not exist",
         SkipEnabledCheck = true)]
     public static partial void LogCategoryWasNotDeleted(this ILogger logger, Guid deleteCategoryId);
 

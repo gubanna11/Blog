@@ -5,9 +5,15 @@ namespace Blog.Core.Logging;
 
 public static partial class LogCommentMessage
 {
+    [LoggerMessage(EventId = LogEvents.CommentWasGottenId, EventName = LogEvents.CommentWasGottenName,
+        Level = LogLevel.Information,
+        Message = "Comment object with id {GetByIdCommentId} was gotten",
+        SkipEnabledCheck = true)]
+    public static partial void LogCommentWithIdWasGotten(this ILogger logger, Guid getByIdCommentId);
+    
     [LoggerMessage(EventId = LogEvents.CommentWasNotGottenId, EventName = LogEvents.CommentWasNotGottenName,
         Level = LogLevel.Error,
-        Message = "Comment object with id {GetByIdCommentId} doesn't exist",
+        Message = "Comment object with id {GetByIdCommentId} does not exist",
         SkipEnabledCheck = true)]
     public static partial void LogCommentWithIdDoesNotExist(this ILogger logger, Guid getByIdCommentId);
 
@@ -25,7 +31,7 @@ public static partial class LogCommentMessage
 
     [LoggerMessage(EventId = LogEvents.CommentWasNotDeletedId, EventName = LogEvents.CommentWasNotDeletedName,
         Level = LogLevel.Error,
-        Message = "Comment object with id {DeleteCommentId} doesn't exist",
+        Message = "Comment object with id {DeleteCommentId} does not exist",
         SkipEnabledCheck = true)]
     public static partial void LogCommentWasNotDeleted(this ILogger logger, Guid deleteCommentId);
 

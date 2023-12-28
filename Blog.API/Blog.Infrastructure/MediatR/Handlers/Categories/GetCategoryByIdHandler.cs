@@ -29,6 +29,10 @@ public sealed class GetCategoryByIdHandler : IRequestHandler<GetCategoryByIdQuer
         {
             _logger.LogCategoryWithIdDoesNotExist(request.Id);
         }
+        else
+        {
+            _logger.LogCategoryWithIdWasGotten(category.CategoryId);
+        }
 
         return category;
     }

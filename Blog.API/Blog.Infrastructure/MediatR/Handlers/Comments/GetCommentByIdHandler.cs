@@ -29,6 +29,10 @@ public sealed class GetCommentByIdHandler : IRequestHandler<GetCommentByIdQuery,
         {
             _logger.LogCommentWithIdDoesNotExist(request.Id);
         }
+        else
+        {
+            _logger.LogCommentWithIdWasGotten(comment.CommentId);
+        }
 
         return comment;
     }

@@ -5,9 +5,15 @@ namespace Blog.Core.Logging;
 
 public static partial class LogPostMessage
 {
+    [LoggerMessage(EventId = LogEvents.PostWasGottenId, EventName = LogEvents.PostWasGottenName,
+        Level = LogLevel.Information,
+        Message = "Post object with id {GetByIdPostId} was gotten",
+        SkipEnabledCheck = true)]
+    public static partial void LogPostWithIdWasGotten(this ILogger logger, Guid getByIdPostId);
+    
     [LoggerMessage(EventId = LogEvents.PostWasNotGottenId, EventName = LogEvents.PostWasNotGottenName,
         Level = LogLevel.Error,
-        Message = "Post object with id {GetByIdPostId} doesn't exist",
+        Message = "Post object with id {GetByIdPostId} does not exist",
         SkipEnabledCheck = true)]
     public static partial void LogPostWithIdDoesNotExist(this ILogger logger, Guid getByIdPostId);
 
@@ -25,7 +31,7 @@ public static partial class LogPostMessage
 
     [LoggerMessage(EventId = LogEvents.PostWasNotDeletedId, EventName = LogEvents.PostWasNotDeletedName,
         Level = LogLevel.Error,
-        Message = "Post object with id {DeletePostId} doesn't exist",
+        Message = "Post object with id {DeletePostId} does not exist",
         SkipEnabledCheck = true)]
     public static partial void LogPostWasNotDeleted(this ILogger logger, Guid deletePostId);
 
