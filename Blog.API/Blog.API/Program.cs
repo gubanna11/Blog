@@ -1,6 +1,9 @@
 using Blog.API.Middlewares;
 using Blog.Dependencies;
+using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -22,6 +25,9 @@ builder.Services.ConfigureEnvironment(builder.Configuration);
 
 builder.Services.AddTransient<GlobalExceptionHandlingMiddleware>();
 
+builder.Services.AddHealthChecks()
+    .AddSqlServer(builder.Configuration.GetConnectionString("Database")!);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -39,5 +45,12 @@ app.UseAuthorization();
 app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 
 app.MapControllers();
+
+app.MapHealthChecks(
+    "/health",
+    new HealthCheckOptions
+    {
+        ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+    });
 
 app.Run();
