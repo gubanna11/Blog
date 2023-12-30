@@ -19,7 +19,7 @@ public sealed class GetCommentsHandler : IRequestHandler<GetCommentsQuery, IEnum
 
     public async Task<IEnumerable<CommentResponse>> Handle(GetCommentsQuery request, CancellationToken cancellationToken)
     {
-        var comments = await _commentService.GetComments();
+        var comments = await _commentService.GetComments(cancellationToken);
 
         return comments;
     }

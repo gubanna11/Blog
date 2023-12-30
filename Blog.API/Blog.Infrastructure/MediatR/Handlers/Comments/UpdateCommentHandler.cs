@@ -22,7 +22,7 @@ public sealed class UpdateCommentHandler : IRequestHandler<UpdateCommentCommand,
 
     public async Task<CommentResponse?> Handle(UpdateCommentCommand request, CancellationToken cancellationToken)
     {
-        var responseComment = await _commentService.UpdateComment(request.Comment);
+        var responseComment = await _commentService.UpdateComment(request.Comment, cancellationToken);
 
         if (responseComment is null)
         {

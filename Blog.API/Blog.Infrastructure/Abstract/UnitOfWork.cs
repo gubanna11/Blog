@@ -1,4 +1,5 @@
-﻿using Blog.Infrastructure.Abstract.Interfaces;
+﻿using System.Threading;
+using Blog.Infrastructure.Abstract.Interfaces;
 using Blog.Infrastructure.Data;
 using System.Threading.Tasks;
 
@@ -17,8 +18,8 @@ public sealed class UnitOfWork<T> : IUnitOfWork<T> where T : class
 
     public IGenericRepository<T> GenericRepository => _genericRepository;
 
-    public async Task SaveChangesAsync()
+    public async Task SaveChangesAsync(CancellationToken cancellationToken)
     {
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

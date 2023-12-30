@@ -22,7 +22,7 @@ public sealed class GetCategoryByIdHandler : IRequestHandler<GetCategoryByIdQuer
 
     public async Task<CategoryResponse?> Handle(GetCategoryByIdQuery request, CancellationToken cancellationToken)
     {
-        CategoryResponse? category = await _categoryService.GetCategoryById(request.Id);
+        CategoryResponse? category = await _categoryService.GetCategoryById(request.Id, cancellationToken);
 
         if(category is null)
         {

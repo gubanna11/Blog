@@ -2,13 +2,12 @@
 using Blog.Core.Entities;
 using Blog.Infrastructure.Abstract.Interfaces;
 using Blog.Infrastructure.Services.Interfaces;
-using FluentValidation;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Blog.Infrastructure.Services;
@@ -25,17 +24,17 @@ public sealed class CategoryService : ICategoryService
         _mapper = mapper;
     }
 
-    public async Task<IEnumerable<CategoryResponse>> GetCategories()
+    public async Task<IEnumerable<CategoryResponse>> GetCategories(CancellationToken cancellationToken)
     {
         var categories = await _unitOfWork.GenericRepository.Set
             .Include(c => c.Posts)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         foreach (var category in categories)
         {
             if (category.Posts is not null)
             {
-                foreach (Post post in category.Posts)
+                foreach (var post in category.Posts)
                 {
                     post.Category = null;
                 }
@@ -44,18 +43,18 @@ public sealed class CategoryService : ICategoryService
         return _mapper.Map<IEnumerable<CategoryResponse>>(categories);
     }
 
-    public async Task<CategoryResponse?> GetCategoryById(Guid id)
+    public async Task<CategoryResponse?> GetCategoryById(Guid id, CancellationToken cancellationToken)
     {
-        Category? category = await _unitOfWork.GenericRepository.Set
+        var category = await _unitOfWork.GenericRepository.Set
             .Where(c => c.CategoryId == id)
             .Include(c => c.Posts)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (category is not null)
         {
             if (category.Posts is not null)
             {
-                foreach (Post post in category.Posts)
+                foreach (var post in category.Posts)
                 {
                     post.Category = null;
                 }
@@ -66,33 +65,34 @@ public sealed class CategoryService : ICategoryService
         return null;
     }
 
-    public async Task<CategoryResponse?> CreateCategory(CreateCategoryRequest createCategory)
+    public async Task<CategoryResponse?> CreateCategory(CreateCategoryRequest createCategory, CancellationToken cancellationToken)
     {
-        Category category = _mapper.Map<Category>(createCategory);
+        var category = _mapper.Map<Category>(createCategory);
 
-        await _unitOfWork.GenericRepository.AddAsync(category);
-        await _unitOfWork.SaveChangesAsync();
+        await _unitOfWork.GenericRepository.AddAsync(category, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return _mapper.Map<CategoryResponse>(category);
     }
 
-    public async Task<CategoryResponse?> UpdateCategory(UpdateCategoryRequest updateCategory)
+    public async Task<CategoryResponse?> UpdateCategory(UpdateCategoryRequest updateCategory, CancellationToken cancellationToken)
     {
-        Category category = _mapper.Map<Category>(updateCategory);
+        var category = _mapper.Map<Category>(updateCategory);
 
         _unitOfWork.GenericRepository.Update(category);
-        await _unitOfWork.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return _mapper.Map<CategoryResponse>(category);
     }
 
-    public async Task<CategoryResponse?> DeleteCategory(Guid id)
+    public async Task<CategoryResponse?> DeleteCategory(Guid id, CancellationToken cancellationToken)
     {
-        Category? category = _unitOfWork.GenericRepository.Remove(id);
+        var category = await _unitOfWork.GenericRepository.RemoveAsync(id, cancellationToken);
 
         if (category is not null)
         {
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            
             return _mapper.Map<CategoryResponse>(category);
         }
 

@@ -2,13 +2,12 @@
 using Blog.Core.Entities;
 using Blog.Infrastructure.Abstract.Interfaces;
 using Blog.Infrastructure.Services.Interfaces;
-using FluentValidation;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Blog.Infrastructure.Services;
@@ -25,11 +24,12 @@ public sealed class CommentService : ICommentService
         _mapper = mapper;
     }
 
-    public async Task<IEnumerable<CommentResponse>> GetComments()
+    public async Task<IEnumerable<CommentResponse>> GetComments(
+        CancellationToken cancellationToken)
     {
         var comments = await _unitOfWork.GenericRepository.Set
             .Include(c => c.User)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         foreach (var comment in comments)
         {
@@ -42,53 +42,58 @@ public sealed class CommentService : ICommentService
         return _mapper.Map<IEnumerable<CommentResponse>>(comments);
     }
 
-    public async Task<CommentResponse?> GetCommentById(Guid id)
+    public async Task<CommentResponse?> GetCommentById(Guid id, CancellationToken cancellationToken)
     {
-        Comment? comment = await _unitOfWork.GenericRepository.Set
+        var comment = await _unitOfWork.GenericRepository.Set
             .Where(c => c.CommentId == id)
             .Include(c => c.User)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (comment is not null)
         {
-            if(comment.User is not null)
+            if (comment.User is not null)
             {
                 comment.User.Comments = null;
             }
+
             return _mapper.Map<CommentResponse>(comment);
         }
 
         return null;
     }
 
-    public async Task<CommentResponse?> CreateComment(CreateCommentRequest createComment)
+    public async Task<CommentResponse?> CreateComment(CreateCommentRequest createComment,
+        CancellationToken cancellationToken)
     {
-        Comment comment = _mapper.Map<Comment>(createComment);
+        var comment = _mapper.Map<Comment>(createComment);
 
         comment.PublishDate = DateTime.Now;
 
-        await _unitOfWork.GenericRepository.AddAsync(comment);
-        await _unitOfWork.SaveChangesAsync();
+        await _unitOfWork.GenericRepository.AddAsync(comment, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
         return _mapper.Map<CommentResponse>(comment);
     }
 
-    public async Task<CommentResponse?> UpdateComment(UpdateCommentRequest updateComment)
+    public async Task<CommentResponse?> UpdateComment(UpdateCommentRequest updateComment,
+        CancellationToken cancellationToken)
     {
-        Comment comment = _mapper.Map<Comment>(updateComment);
+        var comment = _mapper.Map<Comment>(updateComment);
 
         _unitOfWork.GenericRepository.Update(comment);
-        await _unitOfWork.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return _mapper.Map<CommentResponse>(comment);
     }
 
-    public async Task<CommentResponse?> DeleteComment(Guid id)
+    public async Task<CommentResponse?> DeleteComment(Guid id, CancellationToken cancellationToken)
     {
-        Comment? comment = _unitOfWork.GenericRepository.Remove(id);
+        var comment = await _unitOfWork.GenericRepository.RemoveAsync(id, cancellationToken);
 
         if (comment is not null)
         {
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
             return _mapper.Map<CommentResponse>(comment);
         }
 

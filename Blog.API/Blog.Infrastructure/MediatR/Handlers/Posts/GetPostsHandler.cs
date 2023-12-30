@@ -19,7 +19,7 @@ public sealed class GetPostsHandler : IRequestHandler<GetPostsQuery, IEnumerable
 
     public Task<IEnumerable<PostResponse>> Handle(GetPostsQuery request, CancellationToken cancellationToken)
     {
-        var posts = _postService.GetPosts();
+        var posts = _postService.GetPosts(cancellationToken);
 
         return posts;
     }

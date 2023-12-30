@@ -22,7 +22,7 @@ public sealed class GetCommentByIdHandler : IRequestHandler<GetCommentByIdQuery,
 
     public async Task<CommentResponse?> Handle(GetCommentByIdQuery request, CancellationToken cancellationToken)
     {
-        var comment = await _commentService.GetCommentById(request.Id);
+        var comment = await _commentService.GetCommentById(request.Id, cancellationToken);
 
         if(comment is null)
         {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Blog.Infrastructure.Abstract.Interfaces;
 using Blog.Infrastructure.Data;
@@ -22,33 +23,34 @@ public sealed class GenericRepository<T> : IGenericRepository<T> where T : class
 
     public IQueryable<T> Set { get; }
 
-    public async Task AddAsync(T entity)
+    public async Task AddAsync(T entity, CancellationToken cancellationToken)
     {
-        await _context.Set<T>().AddAsync(entity);
+        await _context.Set<T>().AddAsync(entity, cancellationToken);
     }
 
-    public async Task<IEnumerable<T>> GetAllAsync()
+    public async Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken)
     {
-        return await _context.Set<T>().ToListAsync();
+        return await _context.Set<T>().ToListAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<T>> GetAllAsync(params Expression<Func<T, object>>[] includeProperties)
+    public async Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken,
+        params Expression<Func<T, object>>[] includeProperties)
     {
         IQueryable<T> query = _context.Set<T>();
 
         query = includeProperties.Aggregate(query, (current, includeProperty) => current.Include(includeProperty));
 
-        return await query.ToListAsync();
+        return await query.ToListAsync(cancellationToken);
     }
 
-    public async Task<T?> GetByIdAsync(object id)
+    public async Task<T?> GetByIdAsync(object id, CancellationToken cancellationToken)
     {
-        return await _context.Set<T>().FindAsync(id);
+        return await _context.Set<T>().FindAsync(id, cancellationToken);
     }
 
-    public T? Remove(object id)
+    public async Task<T?> RemoveAsync(object id, CancellationToken cancellationToken)
     {
-        var entity = _context.Set<T>().Find(id);
+        var entity = await _context.Set<T>().FindAsync(id, cancellationToken);
         if (entity is not null)
         {
             EntityEntry entityEntry = _context.Entry(entity);
@@ -56,6 +58,7 @@ public sealed class GenericRepository<T> : IGenericRepository<T> where T : class
 
             return entity;
         }
+
         return null;
     }
 
