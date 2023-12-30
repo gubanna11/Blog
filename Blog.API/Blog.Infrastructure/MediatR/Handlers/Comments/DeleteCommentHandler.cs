@@ -22,9 +22,9 @@ public sealed class DeleteCommentHandler : IRequestHandler<DeleteCommentCommand,
 
     public async Task<CommentResponse?> Handle(DeleteCommentCommand request, CancellationToken cancellationToken)
     {
-        var comment = await _commentService.DeleteComment(request.Id);
+        var comment = await _commentService.DeleteComment(request.Id, cancellationToken);
 
-        if(comment is null)
+        if (comment is null)
         {
             _logger.LogError("Comment object with id {DeleteCommentId} doesn't exist", request.Id);
         }

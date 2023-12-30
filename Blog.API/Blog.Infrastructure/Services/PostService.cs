@@ -2,13 +2,12 @@
 using Blog.Core.Entities;
 using Blog.Infrastructure.Abstract.Interfaces;
 using Blog.Infrastructure.Services.Interfaces;
-using FluentValidation;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Blog.Infrastructure.Services;
@@ -25,12 +24,12 @@ public sealed class PostService : IPostService
         _mapper = mapper;
     }
 
-    public async Task<IEnumerable<PostResponse>> GetPosts()
+    public async Task<IEnumerable<PostResponse>> GetPosts(CancellationToken cancellationToken)
     {
         var posts = await _unitOfWork.GenericRepository.Set
             .Include(p => p.Category)
             .Include(p => p.User)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         foreach (var post in posts)
         {
@@ -48,13 +47,13 @@ public sealed class PostService : IPostService
         return _mapper.Map<IEnumerable<PostResponse>>(posts);
     }
 
-    public async Task<PostResponse?> GetPostById(Guid id)
+    public async Task<PostResponse?> GetPostById(Guid id, CancellationToken cancellationToken)
     {
-        Post? post = await _unitOfWork.GenericRepository.Set
+        var post = await _unitOfWork.GenericRepository.Set
             .Where(p => p.PostId == id)
             .Include(p => p.Category)
             .Include(p => p.User)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (post is not null)
         {
@@ -74,35 +73,35 @@ public sealed class PostService : IPostService
         return null;
     }
 
-    public async Task<PostResponse?> CreatePost(CreatePostRequest createPost)
+    public async Task<PostResponse?> CreatePost(CreatePostRequest createPost, CancellationToken cancellationToken)
     {
-        Post post = _mapper.Map<Post>(createPost);
+        var post = _mapper.Map<Post>(createPost);
 
         post.PublishDate = DateTime.Now;
 
-        await _unitOfWork.GenericRepository.AddAsync(post);
-        await _unitOfWork.SaveChangesAsync();
+        await _unitOfWork.GenericRepository.AddAsync(post, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return _mapper.Map<PostResponse>(post);
     }
 
-    public async Task<PostResponse?> UpdatePost(UpdatePostRequest updatePost)
+    public async Task<PostResponse?> UpdatePost(UpdatePostRequest updatePost, CancellationToken cancellationToken)
     {
-        Post post = _mapper.Map<Post>(updatePost);
+        var post = _mapper.Map<Post>(updatePost);
 
         _unitOfWork.GenericRepository.Update(post);
-        await _unitOfWork.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return _mapper.Map<PostResponse>(post);
     }
 
-    public async Task<PostResponse?> DeletePost(Guid id)
+    public async Task<PostResponse?> DeletePost(Guid id, CancellationToken cancellationToken)
     {
-        Post? post = _unitOfWork.GenericRepository.Remove(id);
+        var post = await _unitOfWork.GenericRepository.RemoveAsync(id, cancellationToken);
 
         if (post is not null)
         {
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
             return _mapper.Map<PostResponse>(post);
         }
 

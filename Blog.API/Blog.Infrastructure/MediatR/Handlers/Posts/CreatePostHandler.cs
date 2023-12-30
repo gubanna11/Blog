@@ -22,7 +22,7 @@ public sealed class CreatePostHandler : IRequestHandler<CreatePostCommand, PostR
 
     public async Task<PostResponse?> Handle(CreatePostCommand request, CancellationToken cancellationToken)
     {
-        var responsePost = await _postService.CreatePost(request.Post);
+        var responsePost = await _postService.CreatePost(request.Post, cancellationToken);
 
         if(responsePost is null)
         {

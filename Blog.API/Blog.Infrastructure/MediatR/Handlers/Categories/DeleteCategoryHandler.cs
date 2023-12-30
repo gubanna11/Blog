@@ -22,7 +22,7 @@ public sealed class DeleteCategoryHandler : IRequestHandler<DeleteCategoryComman
 
     public async Task<CategoryResponse?> Handle(DeleteCategoryCommand request, CancellationToken cancellationToken)
     {
-        CategoryResponse? category = await _categoryService.DeleteCategory(request.Id);
+        CategoryResponse? category = await _categoryService.DeleteCategory(request.Id, cancellationToken);
 
         if (category is null)
         {

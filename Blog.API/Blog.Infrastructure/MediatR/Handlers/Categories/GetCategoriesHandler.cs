@@ -19,7 +19,7 @@ public sealed class GetCategoriesHandler : IRequestHandler<GetCategoriesQuery, I
 
     public async Task<IEnumerable<CategoryResponse>> Handle(GetCategoriesQuery request, CancellationToken cancellationToken)
     {
-        var categories = await _categoryService.GetCategories();
+        var categories = await _categoryService.GetCategories(cancellationToken);
 
         return categories;
     }
