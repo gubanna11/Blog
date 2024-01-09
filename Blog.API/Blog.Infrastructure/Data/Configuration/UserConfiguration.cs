@@ -1,8 +1,8 @@
-﻿using Blog.Core.Entities;
+﻿using System;
+using Blog.Core.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
 
 namespace Blog.Infrastructure.Data.Configuration;
 

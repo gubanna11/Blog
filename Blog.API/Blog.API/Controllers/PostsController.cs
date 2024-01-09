@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Blog.Core.Contracts.Controllers.Posts;
-using Blog.Core.Entities;
 using Blog.Core.MediatR.Commands.Posts;
 using Blog.Core.MediatR.Queries.Posts;
 using MediatR;
@@ -25,7 +24,7 @@ public sealed class PostsController : ControllerBase
     }
 
     [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Post>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<PostResponse>))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(NotFoundResult))]
     public async Task<IActionResult> GetPosts(CancellationToken cancellationToken)
     {
@@ -37,7 +36,7 @@ public sealed class PostsController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Post))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PostResponse))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(NotFoundResult))]
     public async Task<IActionResult> GetPostById([FromRoute] Guid id, CancellationToken cancellationToken)
     {
@@ -49,7 +48,7 @@ public sealed class PostsController : ControllerBase
     }
 
     [HttpPost]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Post))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PostResponse))]
     public async Task<IActionResult> CreatePost([FromBody] CreatePostRequest createPost,
         CancellationToken cancellationToken)
     {
@@ -59,7 +58,7 @@ public sealed class PostsController : ControllerBase
     }
 
     [HttpPut]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Post))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PostResponse))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(NotFoundResult))]
     public async Task<IActionResult> UpdatePost([FromBody] UpdatePostRequest updatePost,
         CancellationToken cancellationToken)
@@ -72,7 +71,7 @@ public sealed class PostsController : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Post))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PostResponse))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(NotFoundResult))]
     public async Task<IActionResult> DeletePost([FromRoute] Guid id, CancellationToken cancellationToken)
     {

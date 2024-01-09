@@ -1,14 +1,14 @@
-﻿using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using Blog.Core.Entities;
+﻿using Blog.Core.Contracts.Controllers.Categories;
 using Blog.Core.MediatR.Queries.Categories;
 using Blog.Infrastructure.Services.Interfaces;
 using MediatR;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Blog.Infrastructure.MediatR.Handlers.Categories;
 
-public sealed class GetCategoriesHandler : IRequestHandler<GetCategoriesQuery, IEnumerable<Category>>
+public sealed class GetCategoriesHandler : IRequestHandler<GetCategoriesQuery, IEnumerable<CategoryResponse>>
 {
     private readonly ICategoryService _categoryService;
 
@@ -17,10 +17,10 @@ public sealed class GetCategoriesHandler : IRequestHandler<GetCategoriesQuery, I
         _categoryService = categoryService;
     }
 
-    public Task<IEnumerable<Category>> Handle(GetCategoriesQuery request, CancellationToken cancellationToken)
+    public async Task<IEnumerable<CategoryResponse>> Handle(GetCategoriesQuery request, CancellationToken cancellationToken)
     {
-        var categories = _categoryService.GetCategories();
+        var categories = await _categoryService.GetCategories();
 
-        return Task.FromResult(categories);
+        return categories;
     }
 }

@@ -1,12 +1,12 @@
-﻿using Blog.Infrastructure.Abstract.Interfaces;
-using Blog.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Blog.Infrastructure.Abstract.Interfaces;
+using Blog.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Blog.Infrastructure.Abstract;
 
@@ -14,13 +14,13 @@ public sealed class GenericRepository<T> : IGenericRepository<T> where T : class
 {
     private readonly ApiDataContext _context;
 
-    public IQueryable<T> Set { get; }
-
     public GenericRepository(ApiDataContext context)
     {
         _context = context;
         Set = _context.Set<T>();
     }
+
+    public IQueryable<T> Set { get; }
 
     public async Task AddAsync(T entity)
     {
@@ -46,14 +46,17 @@ public sealed class GenericRepository<T> : IGenericRepository<T> where T : class
         return await _context.Set<T>().FindAsync(id);
     }
 
-    public void Remove(object id)
+    public T? Remove(object id)
     {
-        T? entity = _context.Set<T>().Find(id);
-        if (entity != null)
+        var entity = _context.Set<T>().Find(id);
+        if (entity is not null)
         {
-            EntityEntry entityEntry = _context.Entry<T>(entity);
+            EntityEntry entityEntry = _context.Entry(entity);
             entityEntry.State = EntityState.Deleted;
+
+            return entity;
         }
+        return null;
     }
 
     public void RemoveRange(IEnumerable<T> entities)

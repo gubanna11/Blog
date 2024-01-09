@@ -1,4 +1,5 @@
 ﻿using Blog.Core.Entities;
+using Blog.Core.Validators.Comments;
 using Blog.Infrastructure.Abstract;
 using Blog.Infrastructure.Abstract.Interfaces;
 using Blog.Infrastructure.Data;
@@ -6,6 +7,8 @@ using Blog.Infrastructure.Mapster;
 using Blog.Infrastructure.MediatR.Handlers.Posts;
 using Blog.Infrastructure.Services;
 using Blog.Infrastructure.Services.Interfaces;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Mapster;
 using MapsterMapper;
 using Microsoft.AspNetCore.Identity;
@@ -25,8 +28,9 @@ public static class Dependencies
         services.ConfigureUnitOfWork();
         services.ConfigureServices();
         services.ConfigureMediatR();
+        services.ConfigureValidators();
         services.ConfigureRedis(configuration);
-
+ 
         return services;
     }
 
@@ -68,7 +72,13 @@ public static class Dependencies
     {
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<GetPostsHandler>());
     }
-    
+  
+    private static void ConfigureValidators(this IServiceCollection services)
+    {
+        services.AddFluentValidationAutoValidation();
+        services.AddValidatorsFromAssemblyContaining<CreateCommentRequestValidator>();
+    }
+  
     private static void ConfigureRedis(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddStackExchangeRedisCache(opts =>

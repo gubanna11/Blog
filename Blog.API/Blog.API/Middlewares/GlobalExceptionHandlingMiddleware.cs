@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
 
 namespace Blog.API.Middlewares;
 
@@ -32,7 +32,7 @@ public sealed class GlobalExceptionHandlingMiddleware : IMiddleware
                 Status = StatusCodes.Status500InternalServerError,
                 Type = "Server error",
                 Title = "Server error",
-                Detail = $"An internal server error has occurred",
+                Detail = "An internal server error has occurred"
             };
 
             await context.Response.WriteAsJsonAsync(problemDetails);

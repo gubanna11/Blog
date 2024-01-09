@@ -16,7 +16,7 @@ public sealed class Post
     [ProtoMember(2)]
     public string Title { get; set; } = string.Empty;
 
-    [StringLength(120000, MinimumLength = 50)]
+    [StringLength(120000, MinimumLength = 10)]
     [ProtoMember(3)]
     public string Content { get; set; } = string.Empty;
 

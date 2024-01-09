@@ -1,28 +1,37 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using Blog.Core.Entities;
+﻿using Blog.Core.Contracts.Controllers.Posts;
 using Blog.Core.MediatR.Commands.Posts;
 using Blog.Infrastructure.Services.Interfaces;
-using MapsterMapper;
 using MediatR;
+using Microsoft.Extensions.Logging;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Blog.Infrastructure.MediatR.Handlers.Posts;
 
-public sealed class UpdatePostHandler : IRequestHandler<UpdatePostCommand, Post?>
+public sealed class UpdatePostHandler : IRequestHandler<UpdatePostCommand, PostResponse?>
 {
     private readonly IPostService _postService;
-    private readonly IMapper _mapper;
+    private readonly ILogger _logger;
 
-    public UpdatePostHandler(IPostService postService, IMapper mapper)
+    public UpdatePostHandler(IPostService postService,
+        ILogger<UpdatePostHandler> logger)
     {
         _postService = postService;
-        _mapper = mapper;
+        _logger = logger;
     }
 
-    public async Task<Post?> Handle(UpdatePostCommand request, CancellationToken cancellationToken)
+    public async Task<PostResponse?> Handle(UpdatePostCommand request, CancellationToken cancellationToken)
     {
-        var post = _mapper.Map<Post>(request.Post);
-        var responsePost = await _postService.UpdatePost(post);
+        var responsePost = await _postService.UpdatePost(request.Post);
+
+        if (responsePost is null)
+        {
+            _logger.LogError("Post wasn't updated with id {FailedUpdatePostId}", request.Post.PostId);
+        }
+        else
+        {
+            _logger.LogInformation("Post was updated with id {UpdatedPostId}", responsePost.PostId);
+        }
 
         return responsePost;
     }

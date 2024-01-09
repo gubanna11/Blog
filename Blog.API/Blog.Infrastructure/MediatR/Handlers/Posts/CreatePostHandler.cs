@@ -1,28 +1,37 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using Blog.Core.Entities;
+﻿using Blog.Core.Contracts.Controllers.Posts;
 using Blog.Core.MediatR.Commands.Posts;
 using Blog.Infrastructure.Services.Interfaces;
-using MapsterMapper;
 using MediatR;
+using Microsoft.Extensions.Logging;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Blog.Infrastructure.MediatR.Handlers.Posts;
 
-public sealed class CreatePostHandler : IRequestHandler<CreatePostCommand, Post>
+public sealed class CreatePostHandler : IRequestHandler<CreatePostCommand, PostResponse?>
 {
     private readonly IPostService _postService;
-    private readonly IMapper _mapper;
+    private readonly ILogger _logger;
 
-    public CreatePostHandler(IPostService postService, IMapper mapper)
+    public CreatePostHandler(IPostService postService,
+        ILogger<CreatePostHandler> logger)
     {
         _postService = postService;
-        _mapper = mapper;
+        _logger = logger;
     }
 
-    public async Task<Post> Handle(CreatePostCommand request, CancellationToken cancellationToken)
+    public async Task<PostResponse?> Handle(CreatePostCommand request, CancellationToken cancellationToken)
     {
-        var post = _mapper.Map<Post>(request.Post);
-        var responsePost = await _postService.CreatePost(post);
+        var responsePost = await _postService.CreatePost(request.Post);
+
+        if(responsePost is null)
+        {
+            _logger.LogError("Post wasn't created");
+        }
+        else
+        {
+            _logger.LogInformation("Post was created with id {CreatedPostId}", responsePost.PostId);
+        }
 
         return responsePost;
     }

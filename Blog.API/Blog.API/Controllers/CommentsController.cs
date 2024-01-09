@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Blog.Core.Contracts.Controllers.Comments;
-using Blog.Core.Entities;
 using Blog.Core.MediatR.Commands.Comments;
 using Blog.Core.MediatR.Queries.Comments;
 using MediatR;
@@ -25,7 +24,7 @@ public sealed class CommentsController : ControllerBase
     }
 
     [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Comment>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<CommentResponse>))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(NotFoundResult))]
     public async Task<IActionResult> GetComments(CancellationToken cancellationToken)
     {
@@ -37,7 +36,7 @@ public sealed class CommentsController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Comment))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CommentResponse))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(NotFoundResult))]
     public async Task<IActionResult> GetCommentById([FromRoute] Guid id, CancellationToken cancellationToken)
     {
@@ -49,7 +48,7 @@ public sealed class CommentsController : ControllerBase
     }
 
     [HttpPost]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Comment))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CommentResponse))]
     public async Task<IActionResult> CreateComment([FromBody] CreateCommentRequest createComment,
         CancellationToken cancellationToken)
     {
@@ -59,7 +58,7 @@ public sealed class CommentsController : ControllerBase
     }
 
     [HttpPut]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Comment))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CommentResponse))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(NotFoundResult))]
     public async Task<IActionResult> UpdateComment([FromBody] UpdateCommentRequest updateComment,
         CancellationToken cancellationToken)
@@ -72,7 +71,7 @@ public sealed class CommentsController : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Comment))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CommentResponse))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(NotFoundResult))]
     public async Task<IActionResult> DeleteComment([FromRoute] Guid id, CancellationToken cancellationToken)
     {
