@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Blog.Core.Contracts.Controllers;
+using Blog.Core.Contracts.Controllers.Pagination;
 
 namespace Blog.API.Controllers;
 
@@ -33,6 +35,34 @@ public sealed class CategoriesController : ControllerBase
         if (categories.Any()) return Ok(categories);
 
         return NotFound();
+    }
+
+    [HttpGet("getPaged")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedResponse<CategoryResponse>))]
+    public async Task<IActionResult> GetPagedCategories([FromQuery] GetPagedRequest getPagedRequest,
+        CancellationToken cancellationToken,
+        bool isIncludePosts = true)
+    {
+        var categories = await _mediator.Send(
+            new GetPagedCategoriesQuery(getPagedRequest.SearchTerm, getPagedRequest.SortColumn,
+                getPagedRequest.SortOrder, getPagedRequest.Page, getPagedRequest.PageSize, isIncludePosts),
+            cancellationToken);
+
+        return Ok(categories);
+    }
+
+    [HttpGet("getCursorPaged")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CursorPagedResponse<CategoryResponse>))]
+    public async Task<IActionResult> GetCursorPagedCategories([FromQuery] GetCursorPagedRequest getCursorPagedRequest,
+        CancellationToken cancellationToken, bool isIncludePosts = true)
+    {
+        var categories = await _mediator.Send(
+            new GetCursorPagedCategoriesQuery(getCursorPagedRequest.Cursor, getCursorPagedRequest.PageSize,
+                getCursorPagedRequest.SearchTerm, getCursorPagedRequest.SortColumn, getCursorPagedRequest.SortOrder,
+                isIncludePosts),
+            cancellationToken);
+
+        return Ok(categories);
     }
 
     [HttpGet("{id:guid}")]
