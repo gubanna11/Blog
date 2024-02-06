@@ -10,8 +10,6 @@ using SpanJson.AspNetCore.Formatter;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
@@ -29,7 +27,6 @@ builder.Services.AddProblemDetails();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -46,3 +43,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+public partial class Program { }
