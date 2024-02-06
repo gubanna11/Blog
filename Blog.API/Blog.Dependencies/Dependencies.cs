@@ -29,7 +29,8 @@ public static class Dependencies
         services.ConfigureServices();
         services.ConfigureMediatR();
         services.ConfigureValidators();
-
+        services.ConfigureRedis(configuration);
+ 
         return services;
     }
 
@@ -71,10 +72,18 @@ public static class Dependencies
     {
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<GetPostsHandler>());
     }
-
+  
     private static void ConfigureValidators(this IServiceCollection services)
     {
         services.AddFluentValidationAutoValidation();
         services.AddValidatorsFromAssemblyContaining<CreateCommentRequestValidator>();
+    }
+  
+    private static void ConfigureRedis(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddStackExchangeRedisCache(opts =>
+        {
+            opts.Configuration = configuration.GetConnectionString("RedisCache");
+        });
     }
 }
