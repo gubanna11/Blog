@@ -1,3 +1,4 @@
+using Blog.API.Endpoints;
 using Blog.API.Middlewares;
 using Blog.Dependencies;
 using HealthChecks.UI.Client;
@@ -47,6 +48,12 @@ app.UseExceptionHandler();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
+
+app.MapCategoriesEndpoints();
+app.MapCommentsEndpoints();
+app.MapPostsEndpoints();
 
 app.MapControllers();
 
