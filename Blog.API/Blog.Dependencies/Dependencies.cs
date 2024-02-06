@@ -1,4 +1,4 @@
-﻿using System.Threading.RateLimiting;
+using System.Threading.RateLimiting;
 using Blog.Core.Entities;
 using Blog.Core.Validators.Comments;
 using Blog.Infrastructure.Abstract;
@@ -33,6 +33,7 @@ public static class Dependencies
         services.ConfigureMediatR();
         services.ConfigureValidators();
         services.ConfigureRateLimiter();
+        services.ConfigureRedis(configuration);
 
         return services;
     }
@@ -75,7 +76,7 @@ public static class Dependencies
     {
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<GetPostsHandler>());
     }
-
+  
     private static void ConfigureValidators(this IServiceCollection services)
     {
         services.AddFluentValidationAutoValidation();
@@ -99,6 +100,15 @@ public static class Dependencies
                         Window = TimeSpan.FromSeconds(30),
                     });
             });
+          });
+    }
+  
+    private static void ConfigureRedis(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddStackExchangeRedisCache(opts =>
+        {
+            opts.Configuration = configuration.GetConnectionString("RedisCache");
+
         });
     }
 }
