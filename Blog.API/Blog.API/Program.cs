@@ -1,8 +1,11 @@
 using Blog.API.Middlewares;
 using Blog.Dependencies;
+using HealthChecks.UI.Client;
 using Blog.Infrastructure.Services;
 using Blog.Infrastructure.Services.Interfaces;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -25,6 +28,9 @@ builder.Services.AddSingleton<ICacheService, CacheService>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
+builder.Services.AddHealthChecks()
+    .AddSqlServer(builder.Configuration.GetConnectionString("Database")!);
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -44,6 +50,15 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.MapHealthChecks(
+    "/health",
+    new HealthCheckOptions
+    {
+        ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+    });
+
+
 app.Run();
 
 public partial class Program { }
+
