@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;
+using Blog.Core.Logging;
 
 namespace Blog.Infrastructure.MediatR.Handlers.Comments;
 
@@ -26,11 +27,11 @@ public sealed class CreateCommentHandler : IRequestHandler<CreateCommentCommand,
 
         if(responseComment is null)
         {
-            _logger.LogError("Comment wasn't created");
+            _logger.LogCommentWasNotCreated();
         }
         else
         {
-            _logger.LogInformation("Comment was created with id {CreatedCommentId}", responseComment.CommentId);
+            _logger.LogCommentWasCreated(responseComment.CommentId);
         }
 
         return responseComment;

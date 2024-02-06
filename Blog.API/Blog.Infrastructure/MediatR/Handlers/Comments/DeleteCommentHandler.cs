@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;
+using Blog.Core.Logging;
 
 namespace Blog.Infrastructure.MediatR.Handlers.Comments;
 
@@ -26,7 +27,11 @@ public sealed class DeleteCommentHandler : IRequestHandler<DeleteCommentCommand,
 
         if (comment is null)
         {
-            _logger.LogError("Comment object with id {DeleteCommentId} doesn't exist", request.Id);
+            _logger.LogCommentWasNotDeleted(request.Id);
+        }
+        else
+        {
+            _logger.LogCommentWasDeleted(comment.CommentId);
         }
 
         return comment;

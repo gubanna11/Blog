@@ -7,8 +7,11 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Blog.Core.Contracts.Controllers;
+using Blog.Core.MediatR.Queries.Comments;
 
 namespace Blog.Infrastructure.Services;
 
@@ -29,17 +32,102 @@ public sealed class CommentService : ICommentService
     {
         var comments = await _unitOfWork.GenericRepository.Set
             .Include(c => c.User)
+            .Include(c => c.Post)
             .ToListAsync(cancellationToken);
 
-        foreach (var comment in comments)
-        {
-            if (comment.User is not null)
-            {
-                comment.User.Comments = null;
-            }
-        }
+        NullNesting(comments);
 
         return _mapper.Map<IEnumerable<CommentResponse>>(comments);
+    }
+
+    public async Task<PagedResponse<CommentResponse>> GetPagedComments(GetPagedCommentsQuery request,
+        CancellationToken cancellationToken)
+    {
+        var commentsQuery = _unitOfWork.GenericRepository.Set;
+
+        if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+        {
+            commentsQuery = commentsQuery.Where(c => c.Content.Contains(request.SearchTerm));
+        }
+
+        Expression<Func<Comment, object>> keySelector = request.SortColumn?.ToLower() switch
+        {
+            "content" => comment => comment.Content,
+            "publishDate" => comment => comment.PublishDate,
+            _ => category => category.Content,
+        };
+
+        if (request.SortOrder?.ToLower() == "desc")
+        {
+            commentsQuery = commentsQuery.OrderByDescending(keySelector);
+        }
+        else
+        {
+            commentsQuery = commentsQuery.OrderBy(keySelector);
+        }
+
+        if (request.IsIncludePost)
+        {
+            commentsQuery = commentsQuery
+                .Include(c => c.Post);
+        }
+
+        if (request.IsIncludeUser)
+        {
+            commentsQuery = commentsQuery
+                .Include(c => c.User);
+        }
+
+        var categories = await PagedResponse<CommentResponse>.CreateAsync(commentsQuery, request.Page,
+            request.PageSize, MapCommentsToCommentResponses, NullNesting, cancellationToken);
+
+        return categories;
+    }
+
+    public async Task<CursorPagedResponse<CommentResponse>> GetCursorPagedComments(
+        GetCursorPagedCommentsQuery request,
+        CancellationToken cancellationToken)
+    {
+        var commentsQuery = _unitOfWork.GenericRepository.Set;
+
+        if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+        {
+            commentsQuery = commentsQuery.Where(c => c.Content.Contains(request.SearchTerm));
+        }
+
+        Expression<Func<Comment, object>> keySelector = request.SortColumn?.ToLower() switch
+        {
+            "content" => comment => comment.Content,
+            "publishDate" => comment => comment.PublishDate,
+            _ => category => category.Content,
+        };
+
+        if (request.SortOrder?.ToLower() == "desc")
+        {
+            commentsQuery = commentsQuery.OrderByDescending(keySelector);
+        }
+        else
+        {
+            commentsQuery = commentsQuery.OrderBy(keySelector);
+        }
+
+        if (request.IsIncludePost)
+        {
+            commentsQuery = commentsQuery
+                .Include(c => c.Post);
+        }
+
+        if (request.IsIncludeUser)
+        {
+            commentsQuery = commentsQuery
+                .Include(c => c.User);
+        }
+
+        var categories = await CursorPagedResponse<CommentResponse>.CreateAsync(commentsQuery,
+            request.PageSize, c => c.CommentId > request.Cursor, item => item?.CommentId,
+            MapCommentsToCommentResponses, NullNesting, cancellationToken);
+
+        return categories;
     }
 
     public async Task<CommentResponse?> GetCommentById(Guid id, CancellationToken cancellationToken)
@@ -98,5 +186,30 @@ public sealed class CommentService : ICommentService
         }
 
         return null;
+    }
+
+    private IEnumerable<CommentResponse> MapCommentsToCommentResponses(IEnumerable<Comment> comments)
+    {
+        return _mapper.Map<IEnumerable<CommentResponse>>(comments);
+    }
+
+    private static List<Comment> NullNesting(List<Comment> comments)
+    {
+        foreach (var comment in comments)
+        {
+            if (comment.User is not null)
+            {
+                comment.User.Comments = null;
+                comment.User.Posts = null;
+            }
+
+            if (comment.Post is not null)
+            {
+                comment.Post.User = null;
+                comment.Post.Category = null;
+            }
+        }
+
+        return comments;
     }
 }

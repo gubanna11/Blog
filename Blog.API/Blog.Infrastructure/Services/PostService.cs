@@ -7,8 +7,11 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Blog.Core.Contracts.Controllers;
+using Blog.Core.MediatR.Queries.Posts;
 
 namespace Blog.Infrastructure.Services;
 
@@ -45,6 +48,98 @@ public sealed class PostService : IPostService
         }
 
         return _mapper.Map<IEnumerable<PostResponse>>(posts);
+    }
+
+    public async Task<PagedResponse<PostResponse>> GetPagedPosts(GetPagedPostsQuery request,
+        CancellationToken cancellationToken)
+    {
+        var postsQuery = _unitOfWork.GenericRepository.Set;
+
+        if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+        {
+            postsQuery = postsQuery.Where(p => p.Title.Contains(request.SearchTerm));
+        }
+
+        Expression<Func<Post, object>> keySelector = request.SortColumn?.ToLower() switch
+        {
+            "title" => post => post.Title,
+            "content" => post => post.Content,
+            "publishDate" => post => post.PublishDate,
+            _ => post => post.Title,
+        };
+
+        if (request.SortOrder?.ToLower() == "desc")
+        {
+            postsQuery = postsQuery.OrderByDescending(keySelector);
+        }
+        else
+        {
+            postsQuery = postsQuery.OrderBy(keySelector);
+        }
+
+        if (request.IsIncludeCategory)
+        {
+            postsQuery = postsQuery
+                .Include(p => p.Category);
+        }
+
+        if (request.IsIncludeUser)
+        {
+            postsQuery = postsQuery
+                .Include(p => p.User);
+        }
+
+        var posts = await PagedResponse<PostResponse>.CreateAsync(postsQuery, request.Page,
+            request.PageSize, MapPostsToPostResponses, NullNesting, cancellationToken);
+
+        return posts;
+    }
+
+    public async Task<CursorPagedResponse<PostResponse>> GetCursorPagedPosts(
+        GetCursorPagedPostsQuery request,
+        CancellationToken cancellationToken)
+    {
+        var postsQuery = _unitOfWork.GenericRepository.Set;
+
+        if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+        {
+            postsQuery = postsQuery.Where(p => p.Title.Contains(request.SearchTerm));
+        }
+
+        Expression<Func<Post, object>> keySelector = request.SortColumn?.ToLower() switch
+        {
+            "title" => post => post.Title,
+            "content" => post => post.Content,
+            "publishDate" => post => post.PublishDate,
+            _ => post => post.Title,
+        };
+
+        if (request.SortOrder?.ToLower() == "desc")
+        {
+            postsQuery = postsQuery.OrderByDescending(keySelector);
+        }
+        else
+        {
+            postsQuery = postsQuery.OrderBy(keySelector);
+        }
+
+        if (request.IsIncludeCategory)
+        {
+            postsQuery = postsQuery
+                .Include(p => p.Category);
+        }
+
+        if (request.IsIncludeUser)
+        {
+            postsQuery = postsQuery
+                .Include(p => p.User);
+        }
+
+        var posts = await CursorPagedResponse<PostResponse>.CreateAsync(postsQuery,
+            request.PageSize, c => c.PostId > request.Cursor, item => item?.PostId,
+            MapPostsToPostResponses, NullNesting, cancellationToken);
+
+        return posts;
     }
 
     public async Task<PostResponse?> GetPostById(Guid id, CancellationToken cancellationToken)
@@ -106,5 +201,29 @@ public sealed class PostService : IPostService
         }
 
         return null;
+    }
+
+    private IEnumerable<PostResponse> MapPostsToPostResponses(IEnumerable<Post> posts)
+    {
+        return _mapper.Map<IEnumerable<PostResponse>>(posts);
+    }
+
+    private static List<Post> NullNesting(List<Post> posts)
+    {
+        foreach (var post in posts)
+        {
+            if (post.User is not null)
+            {
+                post.User.Comments = null;
+                post.User.Posts = null;
+            }
+
+            if (post.Category is not null)
+            {
+                post.Category.Posts = null;
+            }
+        }
+
+        return posts;
     }
 }
