@@ -1,4 +1,5 @@
-﻿using Blog.Core.Entities;
+using System.Threading.RateLimiting;
+using Blog.Core.Entities;
 using Blog.Core.Validators.Comments;
 using Blog.Infrastructure.Abstract;
 using Blog.Infrastructure.Abstract.Interfaces;
@@ -11,6 +12,8 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Mapster;
 using MapsterMapper;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -29,6 +32,8 @@ public static class Dependencies
         services.ConfigureServices();
         services.ConfigureMediatR();
         services.ConfigureValidators();
+        services.ConfigureRateLimiter();
+        services.ConfigureRedis(configuration);
 
         return services;
     }
@@ -71,10 +76,39 @@ public static class Dependencies
     {
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<GetPostsHandler>());
     }
-
+  
     private static void ConfigureValidators(this IServiceCollection services)
     {
         services.AddFluentValidationAutoValidation();
         services.AddValidatorsFromAssemblyContaining<CreateCommentRequestValidator>();
+    }
+    
+    private static void ConfigureRateLimiter(this IServiceCollection services)
+    {
+        services.AddRateLimiter(opts =>
+        {
+            opts.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+            opts.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+            {
+                string remoteIpAddress = context.Connection.RemoteIpAddress?.ToString()!;
+
+                return RateLimitPartition.GetFixedWindowLimiter(remoteIpAddress,
+                    _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 30,
+                        Window = TimeSpan.FromSeconds(30),
+                    });
+            });
+          });
+    }
+  
+    private static void ConfigureRedis(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddStackExchangeRedisCache(opts =>
+        {
+            opts.Configuration = configuration.GetConnectionString("RedisCache");
+
+        });
     }
 }
