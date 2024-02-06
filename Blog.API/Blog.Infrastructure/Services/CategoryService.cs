@@ -27,11 +27,11 @@ public sealed class CategoryService : ICategoryService
         _mapper = mapper;
     }
 
-    public async Task<IEnumerable<CategoryResponse>> GetCategories()
+    public async Task<IEnumerable<CategoryResponse>> GetCategories(CancellationToken cancellationToken)
     {
         var categories = await _unitOfWork.GenericRepository.Set
             .Include(c => c.Posts)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         NullCategoriesForPosts(categories);
 
@@ -114,19 +114,18 @@ public sealed class CategoryService : ICategoryService
         return categories;
     }
 
-
-    public async Task<CategoryResponse?> GetCategoryById(Guid id)
+    public async Task<CategoryResponse?> GetCategoryById(Guid id, CancellationToken cancellationToken)
     {
-        Category? category = await _unitOfWork.GenericRepository.Set
+        var category = await _unitOfWork.GenericRepository.Set
             .Where(c => c.CategoryId == id)
             .Include(c => c.Posts)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (category is not null)
         {
             if (category.Posts is not null)
             {
-                foreach (Post post in category.Posts)
+                foreach (var post in category.Posts)
                 {
                     post.Category = null;
                 }
@@ -138,33 +137,34 @@ public sealed class CategoryService : ICategoryService
         return null;
     }
 
-    public async Task<CategoryResponse?> CreateCategory(CreateCategoryRequest createCategory)
+    public async Task<CategoryResponse?> CreateCategory(CreateCategoryRequest createCategory, CancellationToken cancellationToken)
     {
         var category = _mapper.Map<Category>(createCategory);
 
-        await _unitOfWork.GenericRepository.AddAsync(category);
-        await _unitOfWork.SaveChangesAsync();
+        await _unitOfWork.GenericRepository.AddAsync(category, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return _mapper.Map<CategoryResponse>(category);
     }
 
-    public async Task<CategoryResponse?> UpdateCategory(UpdateCategoryRequest updateCategory)
+    public async Task<CategoryResponse?> UpdateCategory(UpdateCategoryRequest updateCategory, CancellationToken cancellationToken)
     {
         var category = _mapper.Map<Category>(updateCategory);
 
         _unitOfWork.GenericRepository.Update(category);
-        await _unitOfWork.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return _mapper.Map<CategoryResponse>(category);
     }
 
-    public async Task<CategoryResponse?> DeleteCategory(Guid id)
+    public async Task<CategoryResponse?> DeleteCategory(Guid id, CancellationToken cancellationToken)
     {
-        var category = _unitOfWork.GenericRepository.Remove(id);
+        var category = await _unitOfWork.GenericRepository.RemoveAsync(id, cancellationToken);
 
         if (category is not null)
         {
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            
             return _mapper.Map<CategoryResponse>(category);
         }
 

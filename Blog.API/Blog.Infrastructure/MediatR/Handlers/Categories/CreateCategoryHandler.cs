@@ -23,7 +23,7 @@ public sealed class CreateCategoryHandler : IRequestHandler<CreateCategoryComman
 
     public async Task<CategoryResponse?> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
     {
-        var responseCategory = await _categoryService.CreateCategory(request.Category);
+        var responseCategory = await _categoryService.CreateCategory(request.Category, cancellationToken);
 
         if(responseCategory is null)
         {

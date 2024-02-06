@@ -23,7 +23,7 @@ public sealed class CreateCommentHandler : IRequestHandler<CreateCommentCommand,
 
     public async Task<CommentResponse?> Handle(CreateCommentCommand request, CancellationToken cancellationToken)
     {
-        var responseComment = await _commentService.CreateComment(request.Comment);
+        var responseComment = await _commentService.CreateComment(request.Comment, cancellationToken);
 
         if(responseComment is null)
         {

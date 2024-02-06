@@ -23,7 +23,7 @@ public sealed class DeletePostHandler : IRequestHandler<DeletePostCommand, PostR
 
     public async Task<PostResponse?> Handle(DeletePostCommand request, CancellationToken cancellationToken)
     {
-        var post = await _postService.DeletePost(request.Id);
+        var post = await _postService.DeletePost(request.Id, cancellationToken);
 
         if (post is null)
         {

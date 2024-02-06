@@ -11,11 +11,11 @@ namespace Blog.Infrastructure.Services.Interfaces;
 
 public interface ICommentService
 {
-    Task<IEnumerable<CommentResponse>> GetComments();
+    Task<IEnumerable<CommentResponse>> GetComments(CancellationToken cancellationToken);
     Task<PagedResponse<CommentResponse>> GetPagedComments(GetPagedCommentsQuery request, CancellationToken cancellationToken);
     Task<CursorPagedResponse<CommentResponse>> GetCursorPagedComments(GetCursorPagedCommentsQuery request, CancellationToken cancellationToken);
-    Task<CommentResponse?> GetCommentById(Guid id);
-    Task<CommentResponse?> CreateComment(CreateCommentRequest createComment);
-    Task<CommentResponse?> UpdateComment(UpdateCommentRequest updateComment);
-    Task<CommentResponse?> DeleteComment(Guid id);
+    Task<CommentResponse?> GetCommentById(Guid id, CancellationToken cancellationToken);
+    Task<CommentResponse?> CreateComment(CreateCommentRequest createComment, CancellationToken cancellationToken);
+    Task<CommentResponse?> UpdateComment(UpdateCommentRequest updateComment, CancellationToken cancellationToken);
+    Task<CommentResponse?> DeleteComment(Guid id, CancellationToken cancellationToken);
 }

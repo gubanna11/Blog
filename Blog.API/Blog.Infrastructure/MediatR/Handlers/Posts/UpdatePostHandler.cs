@@ -23,7 +23,7 @@ public sealed class UpdatePostHandler : IRequestHandler<UpdatePostCommand, PostR
 
     public async Task<PostResponse?> Handle(UpdatePostCommand request, CancellationToken cancellationToken)
     {
-        var responsePost = await _postService.UpdatePost(request.Post);
+        var responsePost = await _postService.UpdatePost(request.Post, cancellationToken);
 
         if (responsePost is null)
         {

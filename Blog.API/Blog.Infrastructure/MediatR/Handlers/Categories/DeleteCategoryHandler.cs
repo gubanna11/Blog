@@ -1,4 +1,4 @@
-﻿using Blog.Core.Contracts.Controllers.Categories;
+using Blog.Core.Contracts.Controllers.Categories;
 using Blog.Core.MediatR.Commands.Categories;
 using Blog.Infrastructure.Services.Interfaces;
 using MediatR;
@@ -23,7 +23,7 @@ public sealed class DeleteCategoryHandler : IRequestHandler<DeleteCategoryComman
 
     public async Task<CategoryResponse?> Handle(DeleteCategoryCommand request, CancellationToken cancellationToken)
     {
-        var category = await _categoryService.DeleteCategory(request.Id);
+        var category = await _categoryService.DeleteCategory(request.Id, cancellationToken);
 
         if (category is null)
         {

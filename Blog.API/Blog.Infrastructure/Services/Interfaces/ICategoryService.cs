@@ -10,11 +10,11 @@ namespace Blog.Infrastructure.Services.Interfaces;
 
 public interface ICategoryService
 {
-    Task<IEnumerable<CategoryResponse>> GetCategories();
+    Task<IEnumerable<CategoryResponse>> GetCategories(CancellationToken cancellationToken);
     Task<PagedResponse<CategoryResponse>> GetPagedCategories(GetPagedCategoriesQuery request, CancellationToken cancellationToken);
     Task<CursorPagedResponse<CategoryResponse>> GetCursorPagedCategories(GetCursorPagedCategoriesQuery request, CancellationToken cancellationToken);
-    Task<CategoryResponse?> GetCategoryById(Guid id);
-    Task<CategoryResponse?> CreateCategory(CreateCategoryRequest createCategory);
-    Task<CategoryResponse?> UpdateCategory(UpdateCategoryRequest updateCategory);
-    Task<CategoryResponse?> DeleteCategory(Guid id);
+    Task<CategoryResponse?> GetCategoryById(Guid id, CancellationToken cancellationToken);
+    Task<CategoryResponse?> CreateCategory(CreateCategoryRequest createCategory, CancellationToken cancellationToken);
+    Task<CategoryResponse?> UpdateCategory(UpdateCategoryRequest updateCategory, CancellationToken cancellationToken);
+    Task<CategoryResponse?> DeleteCategory(Guid id, CancellationToken cancellationToken);
 }

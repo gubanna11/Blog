@@ -23,7 +23,7 @@ public sealed class UpdateCategoryHandler : IRequestHandler<UpdateCategoryComman
 
     public async Task<CategoryResponse?> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
     {
-        var responseCategory = await _categoryService.UpdateCategory(request.Category);
+        var responseCategory = await _categoryService.UpdateCategory(request.Category, cancellationToken);
 
         if (responseCategory is null)
         {
