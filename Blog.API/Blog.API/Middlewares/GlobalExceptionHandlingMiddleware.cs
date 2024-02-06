@@ -1,41 +1,38 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 namespace Blog.API.Middlewares;
 
-public sealed class GlobalExceptionHandlingMiddleware : IMiddleware
+public sealed class GlobalExceptionHandler : IExceptionHandler
 {
     private readonly ILogger _logger;
 
-    public GlobalExceptionHandlingMiddleware(ILogger<GlobalExceptionHandlingMiddleware> logger)
+    public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
     {
         _logger = logger;
     }
 
-    public async Task InvokeAsync(HttpContext context, RequestDelegate next)
+    public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
-        try
+        _logger.LogError("An unhandled exception occurred. Exception: {exception}", exception.ToString());
+
+        httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
+
+        ProblemDetails problemDetails = new()
         {
-            await next(context);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError("An unhandled exception occured. Exception: {error}", ex.ToString());
+            Status = StatusCodes.Status500InternalServerError,
+            Type = "Server error",
+            Title = "Server error",
+            Detail = "An internal server error has occurred"
+        };
 
-            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
 
-            ProblemDetails problemDetails = new()
-            {
-                Status = StatusCodes.Status500InternalServerError,
-                Type = "Server error",
-                Title = "Server error",
-                Detail = "An internal server error has occurred"
-            };
-
-            await context.Response.WriteAsJsonAsync(problemDetails);
-        }
+        return true;
     }
 }
